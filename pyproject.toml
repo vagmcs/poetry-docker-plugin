@@ -1,0 +1,133 @@
+[tool.poetry]
+name = "poetry-docker-plugin"
+version = "0.1.0"
+description = "A poetry plugin for configure and build docker images."
+authors = ["Evangelos Michelioudakis <vagmcs@gmail.com>"]
+license = "MIT"
+readme = "README.md"
+keywords = ["packaging", "poetry", "docker"]
+repository = "https://github.com/vagmcs/poetry-docker-plugin"
+documentation = "https://github.com/vagmcs/poetry-docker-plugin"
+classifiers = [
+    "Intended Audience :: Developers",
+    "Intended Audience :: Information Technology",
+    "Intended Audience :: System Administrators",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Topic :: Software Development",
+    "Topic :: Software Development :: Libraries",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Software Development :: Libraries :: Application Frameworks",
+    "Topic :: Software Development :: Version Control :: Git",
+    "Topic :: System :: Archiving :: Packaging",
+    "Topic :: System :: Installation/Setup",
+    "Topic :: System :: Software Distribution",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "License :: OSI Approved :: MIT License"
+]
+
+packages = [
+    { include = "poetry_docker_plugin" }
+]
+
+[tool.poetry.dependencies]
+python = "^3.9"
+poetry = "^1.2.1"
+
+[tool.poetry.group.dev.dependencies]
+black = "^22.10.0"
+mypy = "^0.982"
+pytest = "^7.1.3"
+flake8 = "^5.0.4"
+isort = "^5.10.1"
+
+# enforce types for safety using mypy
+[tool.mypy]
+python_version = 3.9
+exclude = '(.*\.pyi)|(dist)'
+
+pretty = true
+show_column_numbers = true
+show_error_codes = true
+show_error_context = true
+
+# warnings
+warn_unused_configs = true
+warn_redundant_casts = true
+warn_return_any = true
+warn_unreachable = true
+warn_unused_ignores = true
+warn_no_return = true
+
+# import discovery
+ignore_missing_imports = true
+
+# disallow dynamic typing
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+disallow_untyped_decorators = true
+check_untyped_defs = true
+
+# none and optional
+no_implicit_optional = true
+
+# strictness flags
+strict_equality = true
+implicit_reexport = true
+
+# code style using black and isort
+[tool.black]
+line_length = 120
+target_version = ["py39"]
+color = true
+
+[tool.isort]
+profile = "black"
+line_length = 120
+multi_line_output = 3
+use_parentheses = true
+include_trailing_comma = true
+color_output = true
+
+sections = ["FUTURE", "TYPING", "STDLIB", "THIRDPARTY", "FIRSTPARTY", "LOCALFOLDER"]
+known_typing = ["typing", "types", "typing_extensions", "mypy", "mypy_extensions"]
+import_heading_future="Futures"
+import_heading_stdlib="Standard Library"
+import_heading_typing="Types"
+import_heading_thirdparty="Dependencies"
+import_heading_firstparty="Project"
+
+[tool.poetry.plugins."poetry.application.plugin"]
+docker = "poetry_docker_plugin.plugin:DockerPlugin"
+
+#[tool.docker]
+#image_name = ""
+#args = { package_name = "", version = "1.2.0" } # default values for args
+#from = "python:3.9"
+#labels = { "multi.label1"="value1", "multi.label2"="value2", other="value3" }
+#copy = [
+#    { source = "./poetry-docker-plugin-0.1.0.tar.gz", target = "/opt/pdp.tar.gz" },
+##    { source = "../pyproject.toml", target = "/tmp/pp.toml" }
+#]
+#env.SERVICE_JAVA_OPTS = "-Xms1g -Xmx2g -XX:+DoEscapeAnalysis -XX:+OptimizeStringConcat -XX:+DisableAttachMechanism"
+#env.SERVICE_CONFIGURATION = "$targetDir/etc/application.conf"
+#volume = ["/myvol"]
+#flow = [
+#    { work_dir = "path/to/dir" },
+##    { user = "vagmcs" },
+#    { run = "ls" },
+#    { work_dir = "path/to/dir2" },
+#    { run = "ls /opt" },
+#]
+#expose = [2032, 8888, 9999]
+#entrypoint = ["echo", "Hello"]
+#cmd = ["World"]
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
