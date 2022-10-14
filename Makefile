@@ -37,3 +37,8 @@ test:
 .PHONY: build
 build: compile test
 	@poetry build
+
+### publish        : Publish the package
+.PHONY: publish
+publish:
+	@poetry publish --build
