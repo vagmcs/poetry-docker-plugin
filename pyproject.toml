@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "poetry-docker-plugin"
-version = "0.1.0"
+version = "0.2.0"
 description = "A poetry plugin for configure and build docker images."
 authors = ["Evangelos Michelioudakis <vagmcs@gmail.com>"]
 license = "MIT"
@@ -36,14 +36,14 @@ packages = [
 ]
 
 [tool.poetry.dependencies]
-python = "^3.9"
+python = "^3.7"
 poetry = "^1.2.2"
 
 [tool.poetry.group.dev.dependencies]
 black = "^22.10.0"
 mypy = "^0.982"
 pytest = "^7.1.3"
-flake8 = "^5.0.4"
+flake8 = "^3.9.2"
 isort = "^5.10.1"
 
 # enforce types for safety using mypy
@@ -104,29 +104,6 @@ import_heading_firstparty="Project"
 
 [tool.poetry.plugins."poetry.application.plugin"]
 docker = "poetry_docker_plugin.plugin:DockerPlugin"
-
-#[tool.docker]
-#image_name = ""
-#args = { package_name = "", version = "1.2.0" } # default values for args
-#from = "python:3.9"
-#labels = { "multi.label1"="value1", "multi.label2"="value2", other="value3" }
-#copy = [
-#    { source = "./poetry-docker-plugin-0.1.0.tar.gz", target = "/opt/pdp.tar.gz" },
-##    { source = "../pyproject.toml", target = "/tmp/pp.toml" }
-#]
-#env.SERVICE_JAVA_OPTS = "-Xms1g -Xmx2g -XX:+DoEscapeAnalysis -XX:+OptimizeStringConcat -XX:+DisableAttachMechanism"
-#env.SERVICE_CONFIGURATION = "$targetDir/etc/application.conf"
-#volume = ["/myvol"]
-#flow = [
-#    { work_dir = "path/to/dir" },
-##    { user = "vagmcs" },
-#    { run = "ls" },
-#    { work_dir = "path/to/dir2" },
-#    { run = "ls /opt" },
-#]
-#expose = [2032, 8888, 9999]
-#entrypoint = ["echo", "Hello"]
-#cmd = ["World"]
 
 [build-system]
 requires = ["poetry-core"]
