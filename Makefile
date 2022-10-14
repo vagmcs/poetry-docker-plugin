@@ -25,7 +25,7 @@ format:
 .PHONY: compile
 compile: format
 	@poetry check
-	@poetry run flake8 --max-line-length 120 src tests examples
+	@poetry run flake8 --max-line-length 120 .
 	@poetry run mypy .
 
 ### test           : Run all tests

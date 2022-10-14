@@ -38,7 +38,7 @@ flow = [
 ]
 expose = [8888, 9999]
 cmd = ["run_service", "--verbose"]
-entrypoint = ""
+entrypoint = []
 ```
 
 then, as soon as you are done configuring, type:
