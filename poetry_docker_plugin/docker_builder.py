@@ -207,7 +207,8 @@ class Cmd(Instruction):
         self._args = args
 
     def __str__(self):
-        return f"CMD {str(self._args)}"
+        args = ", ".join([f'"{arg}"' for arg in self._args])
+        return f"CMD [{args}]"
 
 
 class EntryPoint(Instruction):
@@ -226,7 +227,8 @@ class EntryPoint(Instruction):
         self._args = args
 
     def __str__(self):
-        return f"ENTRYPOINT {str(self._args)}"
+        args = ", ".join([f'"{arg}"' for arg in self._args])
+        return f"ENTRYPOINT [{args}]"
 
 
 class DockerFile(object):
@@ -262,7 +264,16 @@ class DockerFile(object):
                 docker_file.write(os.linesep)
 
         result = subprocess.run(
-            ["docker", "build", "--tag", image_name, "--file", "dist/Dockerfile", os.path.abspath("dist")],
+            [
+                "docker",
+                "build",
+                "--no-cache",
+                "--tag",
+                image_name,
+                "--file",
+                "dist/Dockerfile",
+                os.path.abspath("dist"),
+            ],
             stdin=subprocess.PIPE,
             stdout=subprocess.PIPE,
             universal_newlines=True,
