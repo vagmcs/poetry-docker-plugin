@@ -18,15 +18,15 @@ clean:
 ### format         : Format source
 .PHONY: format
 format:
-	@poetry run isort .
-	@poetry run black .
+	@poetry run isort poetry_docker_plugin
+	@poetry run black poetry_docker_plugin
 
 ### compile        : Apply code styling and perform type checks
 .PHONY: compile
 compile: format
 	@poetry check
-	@poetry run flake8 --max-line-length 120 .
-	@poetry run mypy .
+	@poetry run flake8 --max-line-length 120 poetry_docker_plugin
+	@poetry run mypy poetry_docker_plugin
 
 ### test           : Run all tests
 .PHONY: test
