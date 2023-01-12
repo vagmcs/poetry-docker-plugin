@@ -16,28 +16,37 @@ class DockerBuild(Command):
     name = "docker"
     description = "Builds docker image."
 
+    def info(self, message: str) -> None:
+        self.io.write_line(f"<info>[INFO]:</info> {message}")
+
+    def debug(self, message: str) -> None:
+        self.io.write_line(f"<debug>[DEBUG]:</debug> {message}")
+
+    def warning(self, message: str) -> None:
+        self.io.write_line(f"<warning>[WARN]:</warning> {message}")
+
+    def error(self, message: str) -> None:
+        self.io.write_error_line(f"<error>[ERROR]:</error> {message}")
+        raise RuntimeError(message)
+
     def handle(self) -> int:
         pyproject_config = self.application.poetry.pyproject.data
         config: Optional[Dict[str, Any]] = pyproject_config.get("tool", dict()).get("docker")
 
         if config is None:
-            message = "<b>poetry-docker-plugin</b>: No configuration found in [tool.docker] in pyproject.toml"
-            self.io.write_error_line(message)
-            raise RuntimeError(message)
+            self.error("No configuration found in [tool.docker] in pyproject.toml")
 
         image_name = config.get("image_name")
         if image_name is None or re.search(".*/.*?(:.*)", image_name) is None:
 
-            author_name = re.match("(.*)<.*>", pyproject_config.get("tool").get("poetry").get("authors")[0])
+            author_name = re.match("(.*)\s+(<.*>)?", pyproject_config.get("tool").get("poetry").get("authors")[0])
             if author_name is None:
-                message = "<b>poetry-docker-plugin</b>: Author name cannot be matched."
-                self.io.write_error_line(message)
-                raise RuntimeError(message)
+                self.error("Author name cannot be matched.")
 
             org: str = author_name.group(1).strip().lower().replace(" ", ".")
             name: str = pyproject_config.get("tool").get("poetry").get("name")
             image_name = f"{org}/{name}:latest"
-            self.io.write_line(f"Image name is not defined, using '{image_name}'.")
+            self.info(f"Image name is not defined, using '{image_name}'.")
 
         # Create docker file
         docker_file = DockerFile(self.io)
@@ -50,9 +59,7 @@ class DockerBuild(Command):
         # Append FROM command
         base_image: Optional[str] = config.get("from")
         if base_image is None:
-            message = "<b>poetry-docker-plugin</b>: No from statement found in [tool.docker] in pyproject.toml"
-            self.io.write_error_line(message)
-            raise RuntimeError(message)
+            self.error("No 'from' statement found in [tool.docker] in pyproject.toml.")
         else:
             docker_file.add(From(base_image))
 
@@ -65,9 +72,7 @@ class DockerBuild(Command):
         for statement in copy_statements:
 
             if "source" not in statement or "target" not in statement:
-                message = f"<b>poetry-docker-plugin</b>: Source/target not present in copy command '{str(statement)}'"
-                self.io.write_error_line(message)
-                raise RuntimeError(message)
+                self.error(f"Source/target not present in copy command: {str(statement)}")
 
             docker_file.add(Copy(statement["source"], statement["target"]))
 
