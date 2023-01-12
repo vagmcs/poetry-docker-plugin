@@ -27,13 +27,14 @@ class DockerBuild(Command):
 
         image_name = config.get("image_name")
         if image_name is None or re.search(".*/.*?(:.*)", image_name) is None:
-            org: str = (
-                re.match("(.*)<.*>", pyproject_config.get("tool").get("poetry").get("authors")[0])
-                .group(1)
-                .strip()
-                .lower()
-                .replace(" ", ".")
-            )
+
+            author_name = re.match("(.*)<.*>", pyproject_config.get("tool").get("poetry").get("authors")[0])
+            if author_name is None:
+                message = "<b>poetry-docker-plugin</b>: Author name cannot be matched."
+                self.io.write_error_line(message)
+                raise RuntimeError(message)
+
+            org: str = author_name.group(1).strip().lower().replace(" ", ".")
             name: str = pyproject_config.get("tool").get("poetry").get("name")
             image_name = f"{org}/{name}:latest"
             self.io.write_line(f"Image name is not defined, using '{image_name}'.")
@@ -68,7 +69,7 @@ class DockerBuild(Command):
                 self.io.write_error_line(message)
                 raise RuntimeError(message)
 
-            docker_file.add(Copy(statement.get("source"), statement.get("target")))
+            docker_file.add(Copy(statement["source"], statement["target"]))
 
         # Append ENV commands
         env = config.get("env", dict())
@@ -111,7 +112,7 @@ class DockerBuild(Command):
         return 0
 
 
-def factory():
+def factory() -> DockerBuild:
     return DockerBuild()
 
 

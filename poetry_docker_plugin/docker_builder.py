@@ -32,7 +32,7 @@ class Arg(Instruction):
         self._arg_name = arg_name
         self._default_value = default_value
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"ARG {self._arg_name}={self._default_value}" if self._default_value else f"ARG {self._arg_name}"
 
 
@@ -47,7 +47,7 @@ class Labels(Instruction):
         """
         self._labels = labels
 
-    def __str__(self):
+    def __str__(self) -> str:
         return "\n".join([f"LABEL {key}={value}" for key, value in self._labels.items()])
 
 
@@ -64,7 +64,7 @@ class From(Instruction):
         self._base_image = base_image
         self._platform = platform
 
-    def __str__(self):
+    def __str__(self) -> str:
         return (
             f"FROM {self._base_image}"
             if self._platform is None
@@ -86,7 +86,7 @@ class Copy(Instruction):
         self._source = source
         self._destination = destination
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"COPY {self._source} {self._destination}"
 
 
@@ -103,7 +103,7 @@ class Env(Instruction):
         self._env_name = env_name
         self._value = value
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f'ENV {self._env_name}="{self._value}"'
 
 
@@ -121,7 +121,7 @@ class Expose(Instruction):
 
         self._port = port
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"EXPOSE {self._port}"
 
 
@@ -136,7 +136,7 @@ class Volume(Instruction):
         """
         self._path = path
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"VOLUME {self._path}"
 
 
@@ -151,7 +151,7 @@ class WorkDir(Instruction):
         """
         self._path = path
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"WORKDIR {self._path}"
 
 
@@ -168,7 +168,7 @@ class User(Instruction):
         self._user = user
         self._group = group
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"USER {self._user}" if self._group is None else f"USER {self._user}:{self._group}"
 
 
@@ -187,7 +187,7 @@ class Run(Instruction):
         """
         self._command = command
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"RUN {self._command}"
 
 
@@ -206,7 +206,7 @@ class Cmd(Instruction):
         """
         self._args = args
 
-    def __str__(self):
+    def __str__(self) -> str:
         args = ", ".join([f'"{arg}"' for arg in self._args])
         return f"CMD [{args}]"
 
@@ -226,7 +226,7 @@ class EntryPoint(Instruction):
         """
         self._args = args
 
-    def __str__(self):
+    def __str__(self) -> str:
         args = ", ".join([f'"{arg}"' for arg in self._args])
         return f"ENTRYPOINT [{args}]"
 
