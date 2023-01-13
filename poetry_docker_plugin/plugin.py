@@ -1,5 +1,5 @@
 # Types
-from typing import Any
+from typing import Any, Dict, List, NoReturn, Optional
 
 # Standard Library
 import re
@@ -9,7 +9,21 @@ from cleo.application import Application
 from cleo.commands.command import Command
 from poetry.plugins.application_plugin import ApplicationPlugin
 
-from .docker_builder import *
+from .docker_builder import (
+    Arg,
+    Cmd,
+    Copy,
+    DockerFile,
+    EntryPoint,
+    Env,
+    Expose,
+    From,
+    Labels,
+    Run,
+    User,
+    Volume,
+    WorkDir,
+)
 
 
 class DockerBuild(Command):
@@ -25,21 +39,21 @@ class DockerBuild(Command):
     def warning(self, message: str) -> None:
         self.io.write_line(f"<warning>[WARN]:</warning> {message}")
 
-    def error(self, message: str) -> None:
+    def error(self, message: str) -> NoReturn:
         self.io.write_error_line(f"<error>[ERROR]:</error> {message}")
         raise RuntimeError(message)
 
     def handle(self) -> int:
         pyproject_config = self.application.poetry.pyproject.data
-        config: Optional[Dict[str, Any]] = pyproject_config.get("tool", dict()).get("docker")
+        config: Dict[str, Any] = pyproject_config.get("tool", dict()).get("docker", dict())
 
-        if config is None:
+        if not config:
             self.error("No configuration found in [tool.docker] in pyproject.toml")
 
         image_name = config.get("image_name")
         if image_name is None or re.search(".*/.*?(:.*)", image_name) is None:
 
-            author_name = re.match("([\w+\s*]+)(<.*>)?", pyproject_config.get("tool").get("poetry").get("authors")[0])
+            author_name = re.match("([\\w+\\s*]+)(<.*>)?", pyproject_config.get("tool").get("poetry").get("authors")[0])
             if author_name is None:
                 self.error("Author name cannot be matched.")
 
@@ -59,7 +73,15 @@ class DockerBuild(Command):
         # Append FROM command
         base_image: Optional[str] = config.get("from")
         if base_image is None:
-            self.error("No 'from' statement found in [tool.docker] in pyproject.toml.")
+            full_python_version = pyproject_config.get("tool").get("poetry").get("dependencies").get("python")
+            python_version = re.match("\\^?(\\d\\.\\d+)(\\.\\d+)?", full_python_version)
+            if python_version is not None:
+                python_version = python_version.group(1)
+            self.warning(
+                f"No 'from' statement found in [tool.docker] in pyproject.toml, "
+                f"using 'python:{python_version}' as base image."
+            )
+            docker_file.add(From(f"python:{python_version}"))
         else:
             docker_file.add(From(base_image))
 
