@@ -39,7 +39,7 @@ class DockerBuild(Command):
         image_name = config.get("image_name")
         if image_name is None or re.search(".*/.*?(:.*)", image_name) is None:
 
-            author_name = re.match("(.*)\s+(<.*>)?", pyproject_config.get("tool").get("poetry").get("authors")[0])
+            author_name = re.match("([\w+\s*]+)(<.*>)?", pyproject_config.get("tool").get("poetry").get("authors")[0])
             if author_name is None:
                 self.error("Author name cannot be matched.")
 
