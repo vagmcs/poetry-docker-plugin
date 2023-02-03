@@ -46,8 +46,8 @@ class DockerBuild(Command):
             long_name="exclude-package",
             description="Do not install project package inside docker container.",
             flag=True,
-            value_required=False
-        )
+            value_required=False,
+        ),
     ]
 
     def info(self, message: str) -> None:
@@ -64,7 +64,7 @@ class DockerBuild(Command):
         raise RuntimeError(message)
 
     def handle(self) -> int:
-        pyproject_config = self.application.poetry.pyproject.data
+        pyproject_config = self.application.poetry.pyproject.data  # type: ignore
         config: Dict[str, Any] = pyproject_config.get("tool", dict()).get("docker", dict())
 
         if not config:
@@ -74,7 +74,7 @@ class DockerBuild(Command):
         multiple_images = {None}
         if all(entry not in COMMANDS for entry in set(config)):
             if all(entry in COMMANDS for image in set(config) for entry in config[image]):
-                multiple_images = set(config)
+                multiple_images = set(config)  # type: ignore
                 self.info(f"Detected '{len(set(config))}' image(s): {list(set(config))}.")
             else:
                 for image in set(config):
@@ -92,14 +92,20 @@ class DockerBuild(Command):
         project_authors = pyproject_config.get("tool").get("poetry").get("authors")
         full_python_version = pyproject_config.get("tool").get("poetry").get("dependencies").get("python")
 
-
         # package the project
         if not self.option("exclude-package"):
             self.call("build")
 
         for image_suffix in multiple_images:
-            image_config = config if image_suffix is None else config[image_suffix]
-            self._build_image(project_name, project_version, project_authors, full_python_version, image_config, image_suffix)
+            image_config = config if image_suffix is None else config[image_suffix]  # type: ignore
+            self._build_image(
+                project_name,
+                project_version,
+                project_authors,
+                full_python_version,
+                image_config,
+                image_suffix,  # type: ignore
+            )
 
         return 0
 
@@ -140,7 +146,7 @@ class DockerBuild(Command):
         if base_image is None:
             python_version = re.match("\\^?(\\d\\.\\d+)(\\.\\d+)?", full_python_version)
             if python_version is not None:
-                python_version = python_version.group(1)
+                python_version = python_version.group(1)  # type: ignore
             self.warning(
                 f"No 'from' statement found in [tool.docker] in pyproject.toml, "
                 f"using 'python:{python_version}' as base image."
@@ -183,9 +189,7 @@ class DockerBuild(Command):
         flow = image_config.get("flow", list())
         # unless excluded, install package
         if not exclude_package:
-            docker_file.add(
-                Run(f"pip install /package/{project_name.replace('-', '_')}-{project_version}.tar.gz")
-            )
+            docker_file.add(Run(f"pip install /package/{project_name.replace('-', '_')}-{project_version}.tar.gz"))
         for instruction in flow:
             if "work_dir" in instruction:
                 docker_file.add(WorkDir(instruction["work_dir"]))
@@ -223,4 +227,4 @@ def factory() -> DockerBuild:
 
 class DockerPlugin(ApplicationPlugin):
     def activate(self, application: Application) -> None:
-        application.command_loader.register_factory("docker", factory)
+        application.command_loader.register_factory("docker", factory)  # type: ignore
