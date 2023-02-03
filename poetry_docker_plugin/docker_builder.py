@@ -249,11 +249,12 @@ class DockerFile(object):
         """
         self._instructions.append(instruction)
 
-    def build(self, image_name: str) -> None:
+    def build(self, image_name: str, platform: str) -> None:
         """
         Builds the docker image.
 
         :param image_name: a name for the docker image
+        :param platform: the image platform
         """
         if not os.path.exists("dist"):
             os.makedirs("dist")
@@ -267,6 +268,7 @@ class DockerFile(object):
             [
                 "docker",
                 "build",
+                f"--platform={platform}",
                 "--no-cache",
                 "--tag",
                 image_name,
