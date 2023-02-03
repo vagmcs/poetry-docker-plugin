@@ -2,6 +2,7 @@ SHELL:=/usr/bin/env bash -euo pipefail -c
 .DEFAULT_GOAL := help
 
 CURRENT_DIR:=$(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
+PROJECT_VERSION:=$(shell poetry version | sed -e 's/poetry-docker-plugin[ ]//g')
 
 .PHONY: help
 help:
@@ -38,7 +39,17 @@ test:
 build: compile test
 	@poetry build
 
+### changelog      : Create changelogs
+.PHONY: changelog
+	@cz changelog --file-name "docs/release_notes/${PROJECT_VERSION}.md" v${PROJECT_VERSION}
+	@cat "docs/release_notes/${PROJECT_VERSION}.md" | tail -n +3 > "docs/release_notes/${PROJECT_VERSION}.md"
+
 ### publish        : Publish the package
 .PHONY: publish
 publish:
+	@echo "Releasing version '${PROJECT_VERSION}'"
+	@git tag -a v"${PROJECT_VERSION}" -m "version ${PROJECT_VERSION}"
+	@gh release create v"${PROJECT_VERSION}" -F "docs/release_notes/${PROJECT_VERSION}.md" \
+		dist/poetry_docker_plugin-${PROJECT_VERSION}.tar.gz \
+		dist/poetry_docker_plugin-${PROJECT_VERSION}-py3-none-any.whl
 	@poetry publish --build
