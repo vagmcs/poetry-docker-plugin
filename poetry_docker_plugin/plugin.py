@@ -7,6 +7,7 @@ import re
 # Dependencies
 from cleo.application import Application
 from cleo.commands.command import Command
+from cleo.helpers import option
 from poetry.plugins.application_plugin import ApplicationPlugin
 
 from .docker_builder import (
@@ -29,6 +30,17 @@ from .docker_builder import (
 class DockerBuild(Command):
     name = "docker"
     description = "Builds docker image."
+
+    options = [
+        option(
+            short_name="p",
+            long_name="platform",
+            description="Set platform",
+            flag=False,
+            value_required=False,
+            default="linux/amd64",
+        )
+    ]
 
     def info(self, message: str) -> None:
         self.io.write_line(f"<info>[INFO]:</info> {message}")
@@ -135,7 +147,10 @@ class DockerBuild(Command):
         if entry_point is not None:
             docker_file.add(EntryPoint(list(entry_point)))
 
-        docker_file.build(image_name)
+        # Build the package and the image
+        self.call("build")
+        self.info(f"Building docker image for platforms: '{self.option('platform')}'.")
+        docker_file.build(image_name, self.option("platform"))
         return 0
 
 
