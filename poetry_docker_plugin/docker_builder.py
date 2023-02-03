@@ -9,6 +9,10 @@ import subprocess
 # Dependencies
 from cleo.io.io import IO
 
+COMMANDS = (
+    "image_name", "args", "from", "labels", "copy", "env", "expose", "volume", "flow", "cmd", "entrypoint"
+)
+
 
 class Instruction(metaclass=abc.ABCMeta):
     """
@@ -249,17 +253,18 @@ class DockerFile(object):
         """
         self._instructions.append(instruction)
 
-    def build(self, image_name: str, platform: str) -> None:
+    def build(self, image_name: str, platform: str, dockerfile_name: str = "Dockerfile") -> None:
         """
         Builds the docker image.
 
         :param image_name: a name for the docker image
         :param platform: the image platform
+        :param dockerfile_name: a name for the resulting Dockerfile
         """
         if not os.path.exists("dist"):
             os.makedirs("dist")
 
-        with open("dist/Dockerfile", "w") as docker_file:
+        with open(f"dist/{dockerfile_name}", "w") as docker_file:
             for instruction in self._instructions:
                 docker_file.write(str(instruction))
                 docker_file.write(os.linesep)
@@ -273,7 +278,7 @@ class DockerFile(object):
                 "--tag",
                 image_name,
                 "--file",
-                "dist/Dockerfile",
+                f"dist/{dockerfile_name}",
                 os.path.abspath("dist"),
             ],
             stdin=subprocess.PIPE,
