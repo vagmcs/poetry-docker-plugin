@@ -9,9 +9,7 @@ import subprocess
 # Dependencies
 from cleo.io.io import IO
 
-COMMANDS = (
-    "image_name", "args", "from", "labels", "copy", "env", "expose", "volume", "flow", "cmd", "entrypoint"
-)
+COMMANDS = ("image_name", "args", "from", "labels", "copy", "env", "expose", "volume", "flow", "cmd", "entrypoint")
 
 
 class Instruction(metaclass=abc.ABCMeta):
