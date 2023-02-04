@@ -49,6 +49,7 @@ build: compile test
 publish:
 	@echo "Releasing version '${PROJECT_VERSION}'"
 	@git tag -a v"${PROJECT_VERSION}" -m "version ${PROJECT_VERSION}"
+	@git push origin v"${PROJECT_VERSION}"
 	@gh release create v"${PROJECT_VERSION}" -F "docs/release_notes/${PROJECT_VERSION}.md" \
 		dist/poetry_docker_plugin-${PROJECT_VERSION}.tar.gz \
 		dist/poetry_docker_plugin-${PROJECT_VERSION}-py3-none-any.whl
