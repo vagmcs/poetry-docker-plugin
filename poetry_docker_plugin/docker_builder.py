@@ -264,13 +264,14 @@ class DockerFile(object):
                 docker_file.write(str(instruction))
                 docker_file.write(os.linesep)
 
-    def build(self, image_name: str, platform: str, dockerfile_name: str = "Dockerfile") -> None:
+    def build(self, image_name: str, platform: str, dockerfile_name: str = "Dockerfile", push: bool = False) -> None:
         """
         Builds the docker image.
 
         :param image_name: a name for the docker image
         :param platform: the image platform
         :param dockerfile_name: a name for the resulting Dockerfile
+        :param push: pushed the resulting image
         """
         self.create(dockerfile_name)
 
@@ -292,5 +293,23 @@ class DockerFile(object):
         )
 
         if result.returncode == 0:
-            self._io.write_line(f"<b>poetry-version-plugin</b>: Image '{image_name}' was successfully created!")
-            return
+            self._io.write_line(f"<info>[INFO]:</info> Image '{image_name}' was successfully created!")
+        return self.__push(image_name) if push else None
+
+
+    def __push(self, image_name: str) -> None:
+        result =  subprocess.run(
+            [
+                "docker",
+                "push",
+                image_name,
+            ],
+            stdin=subprocess.PIPE,
+            stdout=subprocess.PIPE,
+            universal_newlines=True,
+        )
+
+        if result.returncode == 0:
+            self._io.write_line(f"<info>[INFO]:</info> Image '{image_name}' was successfully pushed!")
+        else:
+            raise RuntimeError(f"Failed to push image '{image_name}'.")
