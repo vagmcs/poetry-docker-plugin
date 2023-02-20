@@ -54,6 +54,12 @@ class DockerBuild(Command):
             flag=True,
             value_required=False,
         ),
+        option(
+            long_name="push",
+            description="Pushes the image to the registry.",
+            flag=True,
+            value_required=False,
+        ),
     ]
 
     def info(self, message: str) -> None:
@@ -227,7 +233,7 @@ class DockerBuild(Command):
         else:
             self.info(f"Building docker image for platforms: '{self.option('platform')}'.")
             docker_file.build(
-                image_name, self.option("platform"), dockerfile_name
+                image_name, self.option("platform"), dockerfile_name, self.option("push")
             )
         self.info(f"Dockerfile is located in 'dist/{dockerfile_name}'.")
 
