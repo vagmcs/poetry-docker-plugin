@@ -251,12 +251,9 @@ class DockerFile(object):
         """
         self._instructions.append(instruction)
 
-    def build(self, image_name: str, platform: str, dockerfile_name: str = "Dockerfile") -> None:
+    def create(self, dockerfile_name: str = "Dockerfile") -> None:
         """
-        Builds the docker image.
-
-        :param image_name: a name for the docker image
-        :param platform: the image platform
+        Creates the docker file.
         :param dockerfile_name: a name for the resulting Dockerfile
         """
         if not os.path.exists("dist"):
@@ -266,6 +263,16 @@ class DockerFile(object):
             for instruction in self._instructions:
                 docker_file.write(str(instruction))
                 docker_file.write(os.linesep)
+
+    def build(self, image_name: str, platform: str, dockerfile_name: str = "Dockerfile") -> None:
+        """
+        Builds the docker image.
+
+        :param image_name: a name for the docker image
+        :param platform: the image platform
+        :param dockerfile_name: a name for the resulting Dockerfile
+        """
+        self.create(dockerfile_name)
 
         result = subprocess.run(
             [

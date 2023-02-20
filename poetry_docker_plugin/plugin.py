@@ -35,16 +35,22 @@ class DockerBuild(Command):
     # list of command options
     options = [
         option(
+            long_name="dockerfile-only",
+            description="Creates Dockerfile, but does not build the image.",
+            flag=True,
+            value_required=False,
+        ),
+        option(
             short_name="p",
             long_name="platform",
-            description="Set platform.",
+            description="Sets the target platform.",
             flag=False,
             value_required=False,
             default="linux/amd64",
         ),
         option(
             long_name="exclude-package",
-            description="Do not install project package inside docker container.",
+            description="Does not install project package inside docker container.",
             flag=True,
             value_required=False,
         ),
@@ -215,10 +221,15 @@ class DockerBuild(Command):
         if entry_point is not None:
             docker_file.add(EntryPoint(list(entry_point)))
 
-        self.info(f"Building docker image for platforms: '{self.option('platform')}'.")
-        docker_file.build(
-            image_name, self.option("platform"), "Dockerfile" if image_suffix is None else f"Dockerfile_{image_suffix}"
-        )
+        dockerfile_name = "Dockerfile" if image_suffix is None else f"Dockerfile_{image_suffix}"
+        if self.option("dockerfile-only"):
+            docker_file.create(dockerfile_name)
+        else:
+            self.info(f"Building docker image for platforms: '{self.option('platform')}'.")
+            docker_file.build(
+                image_name, self.option("platform"), dockerfile_name
+            )
+        self.info(f"Dockerfile is located in 'dist/{dockerfile_name}'.")
 
 
 def factory() -> DockerBuild:
