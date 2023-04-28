@@ -130,6 +130,8 @@ class DockerBuild(Command):
         image_config: Dict[str, Any],
         image_suffix: str,
     ) -> None:
+        def replace_build_in_vars(text: str) -> str:
+            return text.replace("@(name)", project_name.replace("-", "_")).replace("@(version)", project_version)
 
         exclude_package: bool = self.option("exclude-package")
 
@@ -185,7 +187,9 @@ class DockerBuild(Command):
             if "source" not in statement or "target" not in statement:
                 self.error(f"Source/target not present in copy command: {str(statement)}")
 
-            docker_file.add(Copy(statement["source"], statement["target"]))
+            docker_file.add(
+                Copy(replace_build_in_vars(statement["source"]), replace_build_in_vars(statement["target"]))
+            )
 
         # Append ENV commands
         env = image_config.get("env", dict())
@@ -204,11 +208,11 @@ class DockerBuild(Command):
             docker_file.add(Run(f"pip install /package/{project_name.replace('-', '_')}-{project_version}.tar.gz"))
         for instruction in flow:
             if "work_dir" in instruction:
-                docker_file.add(WorkDir(instruction["work_dir"]))
+                docker_file.add(WorkDir(replace_build_in_vars(instruction["work_dir"])))
             elif "user" in instruction:
-                docker_file.add(User(instruction["user"]))
+                docker_file.add(User(replace_build_in_vars(instruction["user"])))
             elif "run" in instruction:
-                docker_file.add(Run(instruction["run"]))
+                docker_file.add(Run(replace_build_in_vars(instruction["run"])))
             else:
                 self.io.write_error_line(f"Unknown command '{instruction}'")
 
@@ -232,9 +236,7 @@ class DockerBuild(Command):
             docker_file.create(dockerfile_name)
         else:
             self.info(f"Building docker image for platforms: '{self.option('platform')}'.")
-            docker_file.build(
-                image_name, self.option("platform"), dockerfile_name, self.option("push")
-            )
+            docker_file.build(image_name, self.option("platform"), dockerfile_name, self.option("push"))
         self.info(f"Dockerfile is located in 'dist/{dockerfile_name}'.")
 
 
