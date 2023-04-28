@@ -5,6 +5,7 @@ from typing import Any, Dict, List, NoReturn, Optional
 import re
 
 # Dependencies
+import git
 from cleo.application import Application
 from cleo.commands.command import Command
 from cleo.helpers import option
@@ -104,6 +105,11 @@ class DockerBuild(Command):
         project_authors = pyproject_config.get("tool").get("poetry").get("authors")
         full_python_version = pyproject_config.get("tool").get("poetry").get("dependencies").get("python")
 
+        try:
+            commit_sha = git.Repo(search_parent_directories=True).head.object.hexsha[:7]
+        except git.InvalidGitRepositoryError:
+            self.error("Invalid git repository. Cannot retrieve commit SHA.")
+
         # package the project
         if not self.option("exclude-package"):
             self.call("build")
@@ -115,6 +121,7 @@ class DockerBuild(Command):
                 project_version,
                 project_authors,
                 full_python_version,
+                commit_sha,
                 image_config,
                 image_suffix,  # type: ignore
             )
@@ -127,11 +134,17 @@ class DockerBuild(Command):
         project_version: str,
         project_authors: List[str],
         full_python_version: str,
+        commit_sha: str,
         image_config: Dict[str, Any],
         image_suffix: str,
     ) -> None:
         def replace_build_in_vars(text: str) -> str:
-            return text.replace("@(name)", project_name.replace("-", "_")).replace("@(version)", project_version)
+            return (
+                text.replace("@(name)", project_name.replace("-", "_"))
+                .replace("@(version)", project_version)
+                .replace("@(pyversion)", full_python_version.removeprefix("^").removeprefix("~"))
+                .replace("@(sha)", commit_sha)
+            )
 
         exclude_package: bool = self.option("exclude-package")
 

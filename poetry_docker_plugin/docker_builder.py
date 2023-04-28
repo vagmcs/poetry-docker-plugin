@@ -296,9 +296,8 @@ class DockerFile(object):
             self._io.write_line(f"<info>[INFO]:</info> Image '{image_name}' was successfully created!")
         return self.__push(image_name) if push else None
 
-
     def __push(self, image_name: str) -> None:
-        result =  subprocess.run(
+        result = subprocess.run(
             [
                 "docker",
                 "push",
