@@ -148,8 +148,8 @@ class DockerBuild(Command):
 
         exclude_package: bool = self.option("exclude-package")
 
-        image_name = image_config.get("image_name")
-        if image_name is None or re.search(".*/.*?(:.*)", image_name) is None:
+        image_tags = [replace_build_in_vars(tag) for tag in image_config.get("tags", list())]
+        if not image_tags or any([re.search(".*/.*?(:.*)", tag) is None for tag in image_tags]):
 
             author_name = re.match("([\\w+\\s*]+)(<.*>)?", project_authors[0])
             if author_name is None:
@@ -157,8 +157,10 @@ class DockerBuild(Command):
 
             org: str = author_name.group(1).strip().lower().replace(" ", ".")
             name: str = project_name if image_suffix is None else f"{project_name}-{image_suffix}"
-            image_name = f"{org}/{name}:latest"
-            self.info(f"Image name is not defined, using '{image_name}'.")
+            image_tags = [f"{org}/{name}:latest"]
+            self.info(f"Image tags are not defined or are invalid, using '{image_tags}'.")
+        else:
+            self.info(f"Found images tags: {list(image_tags)}")
 
         # Create docker file
         docker_file = DockerFile(self.io)
@@ -249,7 +251,7 @@ class DockerBuild(Command):
             docker_file.create(dockerfile_name)
         else:
             self.info(f"Building docker image for platforms: '{self.option('platform')}'.")
-            docker_file.build(image_name, self.option("platform"), dockerfile_name, self.option("push"))
+            docker_file.build(image_tags, self.option("platform"), dockerfile_name, self.option("push"))
         self.info(f"Dockerfile is located in 'dist/{dockerfile_name}'.")
 
 

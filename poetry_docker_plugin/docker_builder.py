@@ -9,7 +9,7 @@ import subprocess
 # Dependencies
 from cleo.io.io import IO
 
-COMMANDS = ("image_name", "args", "from", "labels", "copy", "env", "expose", "volume", "flow", "cmd", "entrypoint")
+COMMANDS = ("tags", "args", "from", "labels", "copy", "env", "expose", "volume", "flow", "cmd", "entrypoint")
 
 
 class Instruction(metaclass=abc.ABCMeta):
@@ -264,11 +264,13 @@ class DockerFile(object):
                 docker_file.write(str(instruction))
                 docker_file.write(os.linesep)
 
-    def build(self, image_name: str, platform: str, dockerfile_name: str = "Dockerfile", push: bool = False) -> None:
+    def build(
+        self, image_tags: List[str], platform: str, dockerfile_name: str = "Dockerfile", push: bool = False
+    ) -> None:
         """
         Builds the docker image.
 
-        :param image_name: a name for the docker image
+        :param image_tags: a list of tags for the docker image
         :param platform: the image platform
         :param dockerfile_name: a name for the resulting Dockerfile
         :param push: pushed the resulting image
@@ -281,8 +283,7 @@ class DockerFile(object):
                 "build",
                 f"--platform={platform}",
                 "--no-cache",
-                "--tag",
-                image_name,
+                *[arg for tag in image_tags for arg in ["--tag", tag]],
                 "--file",
                 f"dist/{dockerfile_name}",
                 os.path.abspath("dist"),
@@ -293,15 +294,16 @@ class DockerFile(object):
         )
 
         if result.returncode == 0:
-            self._io.write_line(f"<info>[INFO]:</info> Image '{image_name}' was successfully created!")
-        return self.__push(image_name) if push else None
+            tags = "\n".join([f"{i + 1}. {tag}" for i, tag in enumerate(image_tags)])
+            self._io.write_line(f"<info>[INFO]:</info> Image was successfully created! Tag list:\n{tags}")
+        [self.__push(tag) if push else None for tag in image_tags]
 
-    def __push(self, image_name: str) -> None:
+    def __push(self, image_tag: str) -> None:
         result = subprocess.run(
             [
                 "docker",
                 "push",
-                image_name,
+                image_tag,
             ],
             stdin=subprocess.PIPE,
             stdout=subprocess.PIPE,
@@ -309,6 +311,6 @@ class DockerFile(object):
         )
 
         if result.returncode == 0:
-            self._io.write_line(f"<info>[INFO]:</info> Image '{image_name}' was successfully pushed!")
+            self._io.write_line(f"<info>[INFO]:</info> Image tag '{image_tag}' was successfully pushed!")
         else:
-            raise RuntimeError(f"Failed to push image '{image_name}'.")
+            raise RuntimeError(f"Failed to push image tag '{image_tag}'.")
