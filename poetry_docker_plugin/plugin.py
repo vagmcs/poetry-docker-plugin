@@ -178,7 +178,6 @@ class DockerBuild(Command):
 
         image_tags = [replace_build_in_vars(tag) for tag in image_config.get("tags", list())]
         if not image_tags or any([re.search(".*/.*?(:.*)", tag) is None for tag in image_tags]):
-
             author_name = re.match("([\\w+\\s*]+)(<.*>)?", project_authors[0])
             if author_name is None:
                 self.error("Author name cannot be matched.")
