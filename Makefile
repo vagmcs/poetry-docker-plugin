@@ -26,17 +26,12 @@ format:
 .PHONY: compile
 compile: format
 	@poetry check
-	@poetry run flake8 --max-line-length 120 poetry_docker_plugin
+	@poetry run ruff poetry_docker_plugin
 	@poetry run mypy poetry_docker_plugin
-
-### test           : Run all tests
-.PHONY: test
-test:
-	@poetry run pytest
 
 ### build          : Compile, run tests and package
 .PHONY: build
-build: compile test
+build: compile
 	@poetry build
 
 ### changelog      : Create changelogs

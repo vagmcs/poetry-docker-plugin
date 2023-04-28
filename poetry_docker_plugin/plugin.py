@@ -42,7 +42,7 @@ class DockerBuild(Command):
             value_required=False,
         ),
         option(
-            long_name="build-only" ,
+            long_name="build-only",
             description="Builds only selected images.",
             flag=False,
             value_required=False,
@@ -67,6 +67,14 @@ class DockerBuild(Command):
             description="Pushes the image to the registry.",
             flag=True,
             value_required=False,
+        ),
+        option(
+            long_name="var",
+            description="Declares a custom variable using the syntax 'name:value'. "
+            "Then, the variable can be used in the docker configuration using: @(var).",
+            flag=False,
+            value_required=False,
+            multiple=True,
         ),
     ]
 
@@ -137,6 +145,7 @@ class DockerBuild(Command):
                 commit_sha,
                 image_config,
                 image_suffix,  # type: ignore
+                {var.split(":")[0]: var.split(":")[1] for var in self.option("var")},
             )
 
         return 0
@@ -150,14 +159,20 @@ class DockerBuild(Command):
         commit_sha: str,
         image_config: Dict[str, Any],
         image_suffix: str,
+        variables: Dict[str, str],
     ) -> None:
         def replace_build_in_vars(text: str) -> str:
-            return (
+            _text = (
                 text.replace("@(name)", project_name.replace("-", "_"))
                 .replace("@(version)", project_version)
                 .replace("@(pyversion)", full_python_version.removeprefix("^").removeprefix("~"))
                 .replace("@(sha)", commit_sha)
             )
+
+            for var, val in variables.items():
+                _text = _text.replace(f"@({var})", val)
+
+            return _text
 
         exclude_package: bool = self.option("exclude-package")
 

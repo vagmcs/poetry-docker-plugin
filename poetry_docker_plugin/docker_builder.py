@@ -296,7 +296,8 @@ class DockerFile(object):
         if result.returncode == 0:
             tags = "\n".join([f"{i + 1}. {tag}" for i, tag in enumerate(image_tags)])
             self._io.write_line(f"<info>[INFO]:</info> Image was successfully created! Tag list:\n{tags}")
-        [self.__push(tag) if push else None for tag in image_tags]
+        for tag in image_tags:
+            self.__push(tag) if push else None
 
     def __push(self, image_tag: str) -> None:
         result = subprocess.run(
