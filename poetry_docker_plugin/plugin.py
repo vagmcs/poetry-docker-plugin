@@ -42,6 +42,13 @@ class DockerBuild(Command):
             value_required=False,
         ),
         option(
+            long_name="build-only" ,
+            description="Builds only selected images.",
+            flag=False,
+            value_required=False,
+            multiple=True,
+        ),
+        option(
             short_name="p",
             long_name="platform",
             description="Sets the target platform.",
@@ -89,6 +96,12 @@ class DockerBuild(Command):
             if all(entry in COMMANDS for image in set(config) for entry in config[image]):
                 multiple_images = set(config)  # type: ignore
                 self.info(f"Detected '{len(set(config))}' image(s): {list(set(config))}.")
+
+                # check if only a subset of images should be build
+                if self.option("build-only"):
+                    selected = set(self.option("build-only"))
+                    multiple_images = multiple_images.intersection(selected)
+                    self.warning(f"Building only image(s): {list(multiple_images)}.")
             else:
                 for image in set(config):
                     if any(entry not in COMMANDS for entry in config[image]):
