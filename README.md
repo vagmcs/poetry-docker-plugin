@@ -9,7 +9,7 @@ A [Poetry](https://python-poetry.org) plugin for configuring and building docker
 
 ## Installation
 
-In order to install the plugin you need to have installed a poetry version `>=1.3.0` and type:
+In order to install the plugin you need to have installed a poetry version `>=1.2.0` and type:
 
 ```bash
 poetry self add poetry-docker-plugin

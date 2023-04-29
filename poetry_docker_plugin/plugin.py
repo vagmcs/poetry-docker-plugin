@@ -3,6 +3,7 @@ from typing import Any, Dict, List, NoReturn, Optional
 
 # Standard Library
 import re
+import sys
 
 # Dependencies
 import git
@@ -71,7 +72,7 @@ class DockerBuild(Command):
         option(
             long_name="var",
             description="Declares a custom variable using the syntax 'name:value'. "
-            "Then, the variable can be used in the docker configuration using: @(var).",
+            "Then, the variable can be used in the docker configuration using: @(name).",
             flag=False,
             value_required=False,
             multiple=True,
@@ -95,6 +96,7 @@ class DockerBuild(Command):
         pyproject_config = self.application.poetry.pyproject.data  # type: ignore
         config: Dict[str, Any] = pyproject_config.get("tool", dict()).get("docker", dict())
 
+        # if no configuration exists, then stop execution
         if not config:
             self.error("No configuration found in [tool.docker] in pyproject.toml")
 
@@ -120,32 +122,51 @@ class DockerBuild(Command):
         elif any(entry not in COMMANDS for entry in set(config)):
             self.error(f"Unknown commands: {','.join(set(config).difference(COMMANDS))}")
 
-        # extract project name, version, authors and python
+        # extract project name, version, authors and python version
         project_name = pyproject_config.get("tool").get("poetry").get("name")
         project_version = pyproject_config.get("tool").get("poetry").get("version")
         project_authors = pyproject_config.get("tool").get("poetry").get("authors")
         full_python_version = pyproject_config.get("tool").get("poetry").get("dependencies").get("python")
 
+        # parse Python version
+        if full_python_version == "*":
+            self.warning("Python version is too generic, using system's running version.")
+            python_version = f"{sys.version_info.major}.{sys.version_info.minor}"
+        elif re.match("(\\^~)?(\\d\\.\\d+)(\\.\\d+)?", full_python_version) is not None:
+            python_version = re.match("(\\^~)?(\\d\\.\\d+)(\\.\\d+)?", full_python_version).group(1)
+        else:
+            python_version = re.match("(\\^~)?(\\d)(\\.\\*)?", full_python_version).group(1)
+
+        # try to retrieve commit SHA-256
+        commit_sha = None
         try:
             commit_sha = git.Repo(search_parent_directories=True).head.object.hexsha[:7]
         except git.InvalidGitRepositoryError:
-            self.error("Invalid git repository. Cannot retrieve commit SHA.")
+            self.warning("Invalid git repository. Cannot retrieve commit SHA.")
 
-        # package the project
+        # collect variables
+        user_variables = {}
+        for var in self.option("var"):
+            _var = var.split(":")
+            if _var[0] in {"name", "version", "py_version", "sha"}:
+                self.error(f"Variable name @({_var[0]}) is already in use by the plugin and cannot be redefined.")
+            user_variables[_var[0]] = _var[1]
+
+        # package the project, unless exclude-package option is specified
         if not self.option("exclude-package"):
             self.call("build")
 
-        for image_suffix in multiple_images:
-            image_config = config if image_suffix is None else config[image_suffix]  # type: ignore
+        for image_name in multiple_images:
+            image_config = config if image_name is None else config.get(image_name)  # type: ignore
             self._build_image(
                 project_name,
                 project_version,
                 project_authors,
-                full_python_version,
+                python_version,
                 commit_sha,
+                user_variables,
                 image_config,
-                image_suffix,  # type: ignore
-                {var.split(":")[0]: var.split(":")[1] for var in self.option("var")},
+                image_name,
             )
 
         return 0
@@ -155,18 +176,18 @@ class DockerBuild(Command):
         project_name: str,
         project_version: str,
         project_authors: List[str],
-        full_python_version: str,
-        commit_sha: str,
-        image_config: Dict[str, Any],
-        image_suffix: str,
+        python_version: str,
+        commit_sha: Optional[str],
         variables: Dict[str, str],
+        image_config: Dict[str, Any],
+        image_suffix: Optional[str],
     ) -> None:
         def replace_build_in_vars(text: str) -> str:
             _text = (
                 text.replace("@(name)", project_name.replace("-", "_"))
                 .replace("@(version)", project_version)
-                .replace("@(pyversion)", full_python_version.removeprefix("^").removeprefix("~"))
-                .replace("@(sha)", commit_sha)
+                .replace("@(py_version)", python_version)
+                .replace("@(sha)", "" if commit_sha is None else commit_sha)
             )
 
             for var, val in variables.items():
@@ -200,9 +221,6 @@ class DockerBuild(Command):
         # Append FROM command
         base_image: Optional[str] = image_config.get("from")
         if base_image is None:
-            python_version = re.match("\\^?(\\d\\.\\d+)(\\.\\d+)?", full_python_version)
-            if python_version is not None:
-                python_version = python_version.group(1)  # type: ignore
             self.warning(
                 f"No 'from' statement found in [tool.docker] in pyproject.toml, "
                 f"using 'python:{python_version}' as base image."
