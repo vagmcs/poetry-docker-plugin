@@ -52,10 +52,10 @@ class DockerBuild(Command):
         option(
             short_name="p",
             long_name="platform",
-            description="Sets the target platform.",
+            description="Sets a target platform.",
             flag=False,
             value_required=False,
-            default="linux/amd64",
+            multiple=True,
         ),
         option(
             long_name="exclude-package",
@@ -70,6 +70,7 @@ class DockerBuild(Command):
             value_required=False,
         ),
         option(
+            short_name="r",
             long_name="var",
             description="Declares a custom variable using the syntax 'name:value'. "
             "Then, the variable can be used in the docker configuration using: @(name).",
@@ -78,6 +79,7 @@ class DockerBuild(Command):
             multiple=True,
         ),
         option(
+            short_name="a",
             long_name="arg",
             description="Declares a build argument using the syntax 'name:value'",
             flag=False,
@@ -326,7 +328,8 @@ class DockerBuild(Command):
         if self.option("dockerfile-only"):
             docker_file.create(dockerfile_name)
         else:
-            self.info(f"Building docker image for platforms: '{self.option('platform')}'.")
+            if self.option("platform") is not None:
+                self.info(f"Building docker image for platforms: '{self.option('platform')}'.")
             docker_file.build(image_tags, self.option("platform"), user_arguments, dockerfile_name, self.option("push"))
         self.info(f"Dockerfile is located in 'dist/{dockerfile_name}'.")
 
