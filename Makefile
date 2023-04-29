@@ -34,18 +34,23 @@ compile: format
 build: compile
 	@poetry build
 
+_bump_version:
+	@poetry version minor
+
 ### changelog      : Create changelogs
 .PHONY: changelog
-	@cz changelog --file-name "docs/release_notes/${PROJECT_VERSION}.md" v${PROJECT_VERSION}
-	@cat "docs/release_notes/${PROJECT_VERSION}.md" | tail -n +3 > "docs/release_notes/${PROJECT_VERSION}.md"
+changelog: _bump_version
+	$(eval NEXT_VERSION=$(shell poetry version | sed -e 's/poetry-docker-plugin[ ]//g'))
+	@git tag -a v"${NEXT_VERSION}" -m "version ${NEXT_VERSION}"
+	@cz changelog --file-name "docs/release_notes/${NEXT_VERSION}.md" v${NEXT_VERSION}
 
 ### publish        : Publish the package
 .PHONY: publish
 publish:
-	@echo "Releasing version '${PROJECT_VERSION}'"
-	@git tag -a v"${PROJECT_VERSION}" -m "version ${PROJECT_VERSION}"
-	@git push origin v"${PROJECT_VERSION}"
-	@gh release create v"${PROJECT_VERSION}" -F "docs/release_notes/${PROJECT_VERSION}.md" \
-		dist/poetry_docker_plugin-${PROJECT_VERSION}.tar.gz \
-		dist/poetry_docker_plugin-${PROJECT_VERSION}-py3-none-any.whl
+	$(eval NEXT_VERSION=$(shell poetry version | sed -e 's/poetry-docker-plugin[ ]//g'))
+	@echo "Releasing version '${NEXT_VERSION}'"
 	@poetry publish --build
+	@git push origin v"${NEXT_VERSION}"
+	@gh release create v"${NEXT_VERSION}" -F "docs/release_notes/${NEXT_VERSION}.md" \
+		dist/poetry_docker_plugin-${NEXT_VERSION}.tar.gz \
+		dist/poetry_docker_plugin-${NEXT_VERSION}-py3-none-any.whl
