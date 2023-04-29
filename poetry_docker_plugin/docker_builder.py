@@ -267,7 +267,7 @@ class DockerFile(object):
     def build(
         self,
         image_tags: List[str],
-        platform: str,
+        platform: List[str],
         arguments: Dict[str, str] = None,
         dockerfile_name: str = "Dockerfile",
         push: bool = False,
@@ -276,34 +276,94 @@ class DockerFile(object):
         Builds the docker image.
 
         :param image_tags: a list of tags for the docker image
-        :param platform: the image platform
+        :param platform: a list of image platform
         :param arguments: a dictionary of build arguments
         :param dockerfile_name: a name for the resulting Dockerfile
         :param push: pushed the resulting image
         """
         self.create(dockerfile_name)
 
-        result = subprocess.run(
-            [
-                "docker",
-                "build",
-                "--no-cache",
-                f"--platform={platform}",
-                *[f"--build-arg={arg}={value}" for arg, value in ({} if arguments is None else arguments).items()],
-                *[arg for tag in image_tags for arg in ["--tag", tag]],
-                "--file",
-                f"dist/{dockerfile_name}",
-                os.path.abspath("dist"),
-            ],
-            stdin=subprocess.PIPE,
-            stdout=subprocess.PIPE,
-            universal_newlines=True,
-        )
+        if not platform:
+            # when there are no platforms specified, use standard build command
+            result = subprocess.run(
+                [
+                    "docker",
+                    "build",
+                    "--no-cache",
+                    *[f"--build-arg={arg}={value}" for arg, value in ({} if arguments is None else arguments).items()],
+                    *[arg for tag in image_tags for arg in ["--tag", tag]],
+                    "--file",
+                    f"dist/{dockerfile_name}",
+                    os.path.abspath("dist"),
+                ],
+                stdin=subprocess.PIPE,
+                stdout=subprocess.PIPE,
+                universal_newlines=True,
+            )
+        elif len(platform) < 2:
+            # when there is one platform specified, use cross-build command and load the image into docker
+            result = subprocess.run(
+                [
+                    "docker",
+                    "buildx",
+                    "build",
+                    "--load",
+                    "--no-cache",
+                    f"--platform={platform[0]}",
+                    *[f"--build-arg={arg}={value}" for arg, value in ({} if arguments is None else arguments).items()],
+                    *[arg for tag in image_tags for arg in ["--tag", tag]],
+                    "--file",
+                    f"dist/{dockerfile_name}",
+                    os.path.abspath("dist"),
+                ],
+                stdin=subprocess.PIPE,
+                stdout=subprocess.PIPE,
+                universal_newlines=True,
+            )
+        else:
+            # when there is more than one platform specified, use cross-build command and keep images in build cache
+            result = subprocess.run(
+                [
+                    "docker",
+                    "buildx",
+                    "build",
+                    "--no-cache",
+                    f"--platform={','.join(platform)}",
+                    *[f"--build-arg={arg}={value}" for arg, value in ({} if arguments is None else arguments).items()],
+                    *[arg for tag in image_tags for arg in ["--tag", tag]],
+                    "--file",
+                    f"dist/{dockerfile_name}",
+                    os.path.abspath("dist"),
+                ],
+                stdin=subprocess.PIPE,
+                stdout=subprocess.PIPE,
+                universal_newlines=True,
+            )
 
         if result.returncode == 0:
             self._io.write_line(f"<info>[INFO]:</info> Image tags successfully created!")
-        for tag in image_tags:
-            self.__push(tag) if push else None
+
+        if push and len(platform) > 1:
+            subprocess.run(
+                [
+                    "docker",
+                    "buildx",
+                    "build",
+                    "--push",
+                    f"--platform={platform}",
+                    *[f"--build-arg={arg}={value}" for arg, value in ({} if arguments is None else arguments).items()],
+                    *[arg for tag in image_tags for arg in ["--tag", tag]],
+                    "--file",
+                    f"dist/{dockerfile_name}",
+                    os.path.abspath("dist"),
+                ],
+                stdin=subprocess.PIPE,
+                stdout=subprocess.PIPE,
+                universal_newlines=True,
+            )
+        elif push:
+            for tag in image_tags:
+                self.__push(tag)
 
     def __push(self, image_tag: str) -> None:
         result = subprocess.run(
