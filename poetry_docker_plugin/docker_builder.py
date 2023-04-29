@@ -265,13 +265,19 @@ class DockerFile(object):
                 docker_file.write(os.linesep)
 
     def build(
-        self, image_tags: List[str], platform: str, dockerfile_name: str = "Dockerfile", push: bool = False
+        self,
+        image_tags: List[str],
+        platform: str,
+        arguments: Dict[str, str] = None,
+        dockerfile_name: str = "Dockerfile",
+        push: bool = False,
     ) -> None:
         """
         Builds the docker image.
 
         :param image_tags: a list of tags for the docker image
         :param platform: the image platform
+        :param arguments: a dictionary of build arguments
         :param dockerfile_name: a name for the resulting Dockerfile
         :param push: pushed the resulting image
         """
@@ -281,8 +287,9 @@ class DockerFile(object):
             [
                 "docker",
                 "build",
-                f"--platform={platform}",
                 "--no-cache",
+                f"--platform={platform}",
+                *[f"--build-arg={arg}={value}" for arg, value in ({} if arguments is None else arguments).items()],
                 *[arg for tag in image_tags for arg in ["--tag", tag]],
                 "--file",
                 f"dist/{dockerfile_name}",
@@ -294,8 +301,7 @@ class DockerFile(object):
         )
 
         if result.returncode == 0:
-            tags = "\n".join([f"{i + 1}. {tag}" for i, tag in enumerate(image_tags)])
-            self._io.write_line(f"<info>[INFO]:</info> Image was successfully created! Tag list:\n{tags}")
+            self._io.write_line(f"<info>[INFO]:</info> Image tags successfully created!")
         for tag in image_tags:
             self.__push(tag) if push else None
 
