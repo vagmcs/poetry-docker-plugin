@@ -77,6 +77,13 @@ class DockerBuild(Command):
             value_required=False,
             multiple=True,
         ),
+        option(
+            long_name="arg",
+            description="Declares a build argument using the syntax 'name:value'",
+            flag=False,
+            value_required=False,
+            multiple=True,
+        ),
     ]
 
     def info(self, message: str) -> None:
@@ -132,10 +139,10 @@ class DockerBuild(Command):
         if full_python_version == "*":
             self.warning("Python version is too generic, using system's running version.")
             python_version = f"{sys.version_info.major}.{sys.version_info.minor}"
-        elif re.match("(\\^~)?(\\d\\.\\d+)(\\.\\d+)?", full_python_version) is not None:
-            python_version = re.match("(\\^~)?(\\d\\.\\d+)(\\.\\d+)?", full_python_version).group(1)
+        elif re.match("[\\^~]?(\\d\\.\\d+)(\\.\\d+)?", full_python_version) is not None:
+            python_version = re.match("[\\^~]?(\\d\\.\\d+)(\\.\\d+)?", full_python_version).group(1)
         else:
-            python_version = re.match("(\\^~)?(\\d)(\\.\\*)?", full_python_version).group(1)
+            python_version = re.match("[\\^~]?(\\d)(\\.\\*)?", full_python_version).group(1)
 
         # try to retrieve commit SHA-256
         commit_sha = None
@@ -152,12 +159,18 @@ class DockerBuild(Command):
                 self.error(f"Variable name @({_var[0]}) is already in use by the plugin and cannot be redefined.")
             user_variables[_var[0]] = _var[1]
 
+        # collect arguments
+        user_arguments = {}
+        for arg in self.option("arg"):
+            _arg = arg.split(":")
+            user_arguments[_arg[0]] = _arg[1]
+
         # package the project, unless exclude-package option is specified
         if not self.option("exclude-package"):
             self.call("build")
 
-        for image_name in multiple_images:
-            image_config = config if image_name is None else config.get(image_name)  # type: ignore
+        for config_name in multiple_images:
+            image_config = config if config_name is None else config.get(config_name)  # type: ignore
             self._build_image(
                 project_name,
                 project_version,
@@ -165,8 +178,9 @@ class DockerBuild(Command):
                 python_version,
                 commit_sha,
                 user_variables,
+                user_arguments,
                 image_config,
-                image_name,
+                config_name,
             )
 
         return 0
@@ -179,8 +193,9 @@ class DockerBuild(Command):
         python_version: str,
         commit_sha: Optional[str],
         variables: Dict[str, str],
+        user_arguments: Dict[str, str],
         image_config: Dict[str, Any],
-        image_suffix: Optional[str],
+        config_name: Optional[str],
     ) -> None:
         def replace_build_in_vars(text: str) -> str:
             _text = (
@@ -204,7 +219,7 @@ class DockerBuild(Command):
                 self.error("Author name cannot be matched.")
 
             org: str = author_name.group(1).strip().lower().replace(" ", ".")
-            name: str = project_name if image_suffix is None else f"{project_name}-{image_suffix}"
+            name: str = project_name if config_name is None else f"{project_name}-{config_name}"
             image_tags = [f"{org}/{name}:latest"]
             self.info(f"Image tags are not defined or are invalid, using '{image_tags}'.")
         else:
@@ -213,10 +228,18 @@ class DockerBuild(Command):
         # Create docker file
         docker_file = DockerFile(self.io)
 
-        # Append all docker ARG
+        # Collect all docker ARG and validate that all user arguments exist in the configuration
         args = image_config.get("args", dict())
-        for arg, default_value in args.items():
-            docker_file.add(Arg(arg, default_value))
+        for arg, _ in user_arguments.items():
+            if arg not in args:
+                self.error(f"Argument '{arg}' does not exist in docker config.")
+
+        def __check_and_pre_append_args(*commands: str) -> None:
+            for command in commands:
+                for arg_name, default_value in args.items():
+                    arg_var = f"${{{arg_name}}}"
+                    if arg_var in command:
+                        docker_file.add(Arg(arg_name, default_value))
 
         # Append FROM command
         base_image: Optional[str] = image_config.get("from")
@@ -227,6 +250,7 @@ class DockerBuild(Command):
             )
             docker_file.add(From(f"python:{python_version}"))
         else:
+            __check_and_pre_append_args(base_image)
             docker_file.add(From(base_image))
 
         # Append all docker LABEL
@@ -247,6 +271,7 @@ class DockerBuild(Command):
             if "source" not in statement or "target" not in statement:
                 self.error(f"Source/target not present in copy command: {str(statement)}")
 
+            __check_and_pre_append_args(statement["source"], statement["target"])
             docker_file.add(
                 Copy(replace_build_in_vars(statement["source"]), replace_build_in_vars(statement["target"]))
             )
@@ -254,6 +279,7 @@ class DockerBuild(Command):
         # Append ENV commands
         env = image_config.get("env", dict())
         for env_name, value in env.items():
+            __check_and_pre_append_args(value)
             docker_file.add(Env(env_name, value))
 
         # Append VOLUME commands
@@ -268,13 +294,16 @@ class DockerBuild(Command):
             docker_file.add(Run(f"pip install /package/{project_name.replace('-', '_')}-{project_version}.tar.gz"))
         for instruction in flow:
             if "work_dir" in instruction:
+                __check_and_pre_append_args(instruction["work_dir"])
                 docker_file.add(WorkDir(replace_build_in_vars(instruction["work_dir"])))
             elif "user" in instruction:
+                __check_and_pre_append_args(instruction["user"])
                 docker_file.add(User(replace_build_in_vars(instruction["user"])))
             elif "run" in instruction:
+                __check_and_pre_append_args(instruction["run"])
                 docker_file.add(Run(replace_build_in_vars(instruction["run"])))
             else:
-                self.io.write_error_line(f"Unknown command '{instruction}'")
+                self.error(f"Unknown command '{instruction}'")
 
         # Append EXPOSE command
         ports = image_config.get("expose", list())
@@ -284,19 +313,21 @@ class DockerBuild(Command):
         # Append CMD command
         cmd = image_config.get("cmd")
         if cmd is not None:
+            __check_and_pre_append_args(cmd)
             docker_file.add(Cmd(list(cmd)))
 
         # Append ENTRYPOINT command
         entry_point = image_config.get("entrypoint")
         if entry_point is not None:
+            __check_and_pre_append_args(entry_point)
             docker_file.add(EntryPoint(list(entry_point)))
 
-        dockerfile_name = "Dockerfile" if image_suffix is None else f"Dockerfile_{image_suffix}"
+        dockerfile_name = "Dockerfile" if config_name is None else f"Dockerfile_{config_name}"
         if self.option("dockerfile-only"):
             docker_file.create(dockerfile_name)
         else:
             self.info(f"Building docker image for platforms: '{self.option('platform')}'.")
-            docker_file.build(image_tags, self.option("platform"), dockerfile_name, self.option("push"))
+            docker_file.build(image_tags, self.option("platform"), user_arguments, dockerfile_name, self.option("push"))
         self.info(f"Dockerfile is located in 'dist/{dockerfile_name}'.")
 
 
