@@ -46,6 +46,7 @@ mypy = "^1.2.0"
 pytest = "^7.1.3"
 ruff = "^0.0.263"
 isort = "^5.10.1"
+commitizen = "^3.1.1"
 
 # enforce types for safety using mypy
 [tool.mypy]
@@ -132,3 +133,27 @@ docker = "poetry_docker_plugin.plugin:DockerPlugin"
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.commitizen]
+name = "cz_customize"
+version = "0.2.0"
+tag_format = "v$version"
+
+[tool.commitizen.customize]
+change_type_order = ["BREAKING CHANGE", "feat", "build", "fix", "perf", "refactor", "style"]
+commit_parser = "^(?P<change_type>feature|feat|bug fix|bug|fix|perf|build|ci|docs|refactor):\\s(?P<message>.*)?"
+changelog_pattern = "^(feature|feat|bugfix|bug|fix|perf|build|ci|docs|refactor|perf)?(!)?"
+
+[tool.commitizen.customize.change_type_map]
+"feat" = "Features"
+"feature" = "Features"
+"bug fix" = "Fixes"
+"bugfix" = "Fixes"
+"bug" = "Fixes"
+"fix" = "Fixes"
+"ci" = "CI"
+"build" = "Build"
+"docs" = "Documentation"
+"refactor" = "Refactor"
+"perf" = "Performance"
+"style" = "Code style"
