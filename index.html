@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="description" content="Poetry plugin for creating docker images.">
+        
+        
+        <link rel="shortcut icon" href="img/favicon.ico">
+        <title>Poetry Docker</title>
+        <link href="css/bootstrap.min.css" rel="stylesheet">
+        <link href="css/font-awesome.min.css" rel="stylesheet">
+        <link href="css/base.css" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/styles/github.min.css">
+
+        <script src="js/jquery-1.10.2.min.js" defer></script>
+        <script src="js/bootstrap.min.js" defer></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/highlight.min.js"></script>
+        <script>hljs.initHighlightingOnLoad();</script> 
+    </head>
+
+    <body class="homepage">
+        <div class="navbar fixed-top navbar-expand-lg navbar-dark bg-primary">
+            <div class="container">
+                <a class="navbar-brand" href=".">Poetry Docker</a>
+                <!-- Expander button -->
+                <button type="button" class="navbar-toggler" data-toggle="collapse" data-target="#navbar-collapse">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <!-- Expanded navigation -->
+                <div id="navbar-collapse" class="navbar-collapse collapse">
+                        <!-- Main navigation -->
+                        <ul class="nav navbar-nav">
+                            <li class="navitem active">
+                                <a href="." class="nav-link">Home</a>
+                            </li>
+                            <li class="dropdown">
+                                <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown">Release Notes <b class="caret"></b></a>
+                                <ul class="dropdown-menu">
+                                    
+<li>
+    <a href="release_notes/0.5.0/" class="dropdown-item">0.5.0</a>
+</li>
+                                    
+<li>
+    <a href="release_notes/0.4.0/" class="dropdown-item">0.4.0</a>
+</li>
+                                </ul>
+                            </li>
+                        </ul>
+
+                    <ul class="nav navbar-nav ml-auto">
+                        <li class="nav-item">
+                            <a href="#" class="nav-link" data-toggle="modal" data-target="#mkdocs_search_modal">
+                                <i class="fa fa-search"></i> Search
+                            </a>
+                        </li>
+                            <li class="nav-item">
+                                <a rel="prev" class="nav-link disabled">
+                                    <i class="fa fa-arrow-left"></i> Previous
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a rel="next" href="release_notes/0.5.0/" class="nav-link">
+                                    Next <i class="fa fa-arrow-right"></i>
+                                </a>
+                            </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="container">
+            <div class="row">
+                    <div class="col-md-3"><div class="navbar-light navbar-expand-md bs-sidebar hidden-print affix" role="complementary">
+    <div class="navbar-header">
+        <button type="button" class="navbar-toggler collapsed" data-toggle="collapse" data-target="#toc-collapse" title="Table of Contents">
+            <span class="fa fa-angle-down"></span>
+        </button>
+    </div>
+
+    
+    <div id="toc-collapse" class="navbar-collapse collapse card bg-secondary">
+        <ul class="nav flex-column">
+            
+            <li class="nav-item" data-level="1"><a href="#poetry-docker-plugin" class="nav-link">Poetry Docker Plugin</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-level="2"><a href="#installation" class="nav-link">Installation</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#quickstart" class="nav-link">Quickstart</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#configuration-overview" class="nav-link">Configuration Overview</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#multiple-docker-images" class="nav-link">Multiple docker images</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#build-in-and-user-defined-variables" class="nav-link">Build-in and user-defined variables</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#build-arguments" class="nav-link">Build arguments</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#multi-platform-builds" class="nav-link">Multi-platform builds</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#command-line-options" class="nav-link">Command-Line options</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-level="2"><a href="#license" class="nav-link">License</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+              </ul>
+            </li>
+        </ul>
+    </div>
+</div></div>
+                    <div class="col-md-9" role="main">
+
+<h1 id="poetry-docker-plugin">Poetry Docker Plugin</h1>
+<p><img alt="PyPI" src="https://img.shields.io/pypi/v/poetry-docker-plugin?color=gree&amp;label=pypi%20package" />
+<img alt="PyPI" src="https://img.shields.io/pypi/pyversions/poetry-docker-plugin?color=gree" /></p>
+<p><a href="https://python-poetry.org">Poetry</a> docker plugin is an extension for configuring and building docker images directly from the comfort of your <code>pyproject.toml</code> configuration.</p>
+<p>The key features are:</p>
+<ul>
+<li>Easy and similar to Dockerfile syntax support.</li>
+<li>Easily generate dockerfiles, build them and push them to any registry.</li>
+<li>Multiple docker image support. You can declare and build multiple images from a single project.</li>
+<li>Supports configuration variables on image declaration that can be set at runtime.</li>
+<li>Multi-platform build support.</li>
+</ul>
+<h2 id="installation">Installation</h2>
+<p>In order to install the plugin you need to have installed a poetry version <code>&gt;=1.2.0</code> and type:</p>
+<pre><code class="language-bash">poetry self add poetry-docker-plugin
+</code></pre>
+<p>That it, you are ready to go!</p>
+<h2 id="quickstart">Quickstart</h2>
+<p>Let's assume that you have created a Poetry project, running a simple service. The service is implemented inside the <code>app</code> package in the <code>__main__.py</code> source file. Then, your poetry <code>pyproject.toml</code> configuration may look as follows:</p>
+<pre><code class="language-toml">[tool.poetry]
+name = &quot;simple_service&quot;
+version = &quot;1.0.0&quot;
+description = &quot;A simple service.&quot;
+authors = [&quot;Evangelos&quot;]
+
+[tool.poetry.dependencies]
+python = &quot;3.11&quot;
+
+[tool.poetry.scripts]
+service = &quot;app.__main__:start&quot;
+</code></pre>
+<p>Since the script <code>service</code> is declared in the <code>[tool.poetry.scripts]</code> section, the service can be run by typing the following command:</p>
+<pre><code class="language-bash">poetry run service
+</code></pre>
+<p>Then, simply by adding the following 3 lines in the <code>pyproject.toml</code> configuration you can build a docker image that runs the service in port 8000.</p>
+<pre><code class="language-toml">[tool.docker]
+expose = [8000]
+cmd = [&quot;service&quot;]
+</code></pre>
+<p>To build the image, just type:</p>
+<pre><code class="language-bash">poetry docker
+</code></pre>
+<p>Phew, that was easy!  </p>
+<p>There are a couple of things to note here:</p>
+<ol>
+<li>
+<p>Since no tag is provided for the image, the plugin automatically derives one from the declared authors and project name. In our case the default tag should be <code>evangelos/simple_service:latest</code>.</p>
+</li>
+<li>
+<p>Since no base image is provided, the plugin automatically infers and uses the python version declared inside <code>pyproject.toml</code>, in our case <code>python:3.11</code>.</p>
+</li>
+<li>
+<p>The plugin automatically packages the project, copies the distribution into the docker container and installs all dependencies. Therefore, all entrypoints declared in <code>pyproject.toml</code>, such as <code>service</code> are accessible inside the docker image!</p>
+</li>
+</ol>
+<p>Of course, you can customize all that, as we shall see shortly. </p>
+<p>Finally, if you are curious to inspect the underlying Dockerfile before building it, just type:</p>
+<pre><code class="language-bash">poetry docker --dockerfile-only 
+</code></pre>
+<h2 id="configuration-overview">Configuration Overview</h2>
+<p>Poetry docker plugin supports most of the commands you can use in a <a href="https://docs.docker.com/engine/reference/builder">Dockerfile</a>. Here is a full configuration the demonstrates all available commands:</p>
+<pre><code class="language-toml">[tool.docker]
+image_tags = [
+    &quot;evangelos/simple_service:1.0.0&quot;,
+    &quot;evangelos/simple_service:latest&quot;,
+]
+args = { python_version = &quot;3.11&quot; }
+from = &quot;python:${python_version}&quot;
+labels = { &quot;description&quot; = &quot;A simple service.&quot; }
+copy = [
+    # a sequence of COPY commands
+    { source = &quot;application.conf&quot;, target = &quot;/package/application.conf&quot; },
+]
+env.LOG_LEVEL = &quot;DEBUG&quot;
+env.ENABLE_METRICS = &quot;true&quot;
+volume = [&quot;/data&quot;]
+flow = [
+    # a sequence of WORKDIR and RUN commands
+    { work_dir = &quot;/package&quot; },
+    { run = &quot;python -m spacy download en_core_web_sm&quot; },
+]
+expose = [8888, 9999]
+cmd = [&quot;service&quot;, &quot;--verbose&quot;] # you may also use entrypoint = []
+</code></pre>
+<ul>
+<li><code>image_tags</code> declare a list of tags for the resulting image.</li>
+<li><code>args</code> declare Dockerfile <a href="https://docs.docker.com/engine/reference/builder/#arg">arguments</a> and their default values. Default values are mandatory.</li>
+<li><code>from</code> declares the base image. If <a href="https://docs.docker.com/engine/reference/builder/#from">from</a> command is omitted, the plugin automatically figures out the python version of the project and use it as the base image.</li>
+<li><code>labels</code> declare a dictionary of metadata for the image.</li>
+<li><code>copy</code> declares a list of dictionaries, each one having only a <code>source</code> and a <code>target</code> key-value pair that performs a <a href="https://docs.docker.com/engine/reference/builder/#copy">copy</a> command inside the docker container.</li>
+<li><code>env</code> declares environment variables inside the docker image.</li>
+<li><code>volume</code> declares a list of mount points to be used for holding externally mounted volumes.</li>
+<li><code>flow</code> declares a list of <code>workdir</code>, <code>user</code> and <code>run</code> docker commands.</li>
+<li><code>expose</code> exposes a list of ports.</li>
+<li><code>cmd</code> and/or <code>entrypoint</code> declare a list holding the executable of the image and its arguments.</li>
+</ul>
+<p>as soon as you are done configuring, type:</p>
+<pre><code class="language-bash">poetry docker
+</code></pre>
+<p>when the build is finished, validate that the image tags are available by typing:</p>
+<pre><code class="language-bash">docker images
+</code></pre>
+<h2 id="multiple-docker-images">Multiple docker images</h2>
+<p>In a number of projects, there are multiple modules, and thus, it is necessary to build more than one docker images from the project sources. For instance, machine learning engineers often need to build one image for training a model, and one for the service deployed in production after the training has been completed. To that end, <code>poetry-docker-plugin</code> supports multi-docker image configurations. </p>
+<p>Consider the following simple example of a machine learning project configuration:</p>
+<pre><code class="language-toml">[tool.poetry]
+name = &quot;example_ml_project&quot;
+version = &quot;1.0.0&quot;
+description = &quot;An example ML project.&quot;
+authors = [&quot;Evangelos&quot;]
+
+[tool.poetry.dependencies]
+python = &quot;3.11&quot;
+
+[tool.poetry.scripts]
+service = &quot;app.__main__:start&quot;
+trainer = &quot;trainer.__main__:start&quot;
+</code></pre>
+<p>Note that the project declares one poetry script that starts a service, and another one that runs the training job. The plugin allows us to easily declare one docker configuration for each script, as follows:</p>
+<pre><code class="language-toml">[tool.docker.service]
+expose = [8000]
+cmd = [&quot;service&quot;]
+
+[tool.docker.trainer]
+cmd = [&quot;trainer&quot;]
+</code></pre>
+<p>To build both images type:</p>
+<pre><code class="language-bash">poetry docker
+</code></pre>
+<p>The plugin should detect both configurations and build separate images for the service and the trainer. Each of these configurations has its own Dockerfile and thus can be fully configured using the commands described in the <a href="#configuration-overview">Configuration Overview</a>.</p>
+<blockquote>
+<p>You may build only one of the declared images by providing the <code>--build-only</code> option in the <code>poetry docker</code> command (see <a href="#command-line-options">Command line options</a> for more details).</p>
+</blockquote>
+<h2 id="build-in-and-user-defined-variables">Build-in and user-defined variables</h2>
+<p>Poetry docker plugin provides a few build-in variables that can be used in the <code>pyproject.toml</code> configuration to facilitate the maintainability of the declared images. Currently, there are four build-in variables:</p>
+<ul>
+<li><strong>@(name)</strong>: the name of the project.</li>
+<li><strong>@(version)</strong>: the version of the project.</li>
+<li><strong>@(py_version)</strong>: the python version.</li>
+<li><strong>@(sha)</strong>: the commit 7-byte SHA-256, in case the project is a git repository.</li>
+</ul>
+<p>These variables may be used anywhere in the <code>[tool.docker]</code> section of <code>pyproject.toml</code> and they should be replaced by their actual value during the build process. For instance,</p>
+<pre><code class="language-toml">[tool.docker]
+image_tags = [
+    &quot;org/@(name):latest&quot;,
+    &quot;org/@(name):@(version)&quot;,
+    &quot;org/@(name):@(sha)&quot;
+]
+from = &quot;python:@(py_version)&quot;
+expose = [8888]
+cmd = [&quot;service&quot;]
+</code></pre>
+<p>this configuration should build an image using as base image the python version declared in the <code>pyproject.toml</code>, which is identical to the default case, that is, when <code>from</code> command is not provided. The build should create three tags,</p>
+<ol>
+<li><code>org/example_ml_project:latest</code></li>
+<li><code>org/example_ml_project:1.0.0</code></li>
+<li><code>org/example_ml_project:7515162</code></li>
+</ol>
+<p>The plugin also allows user-defined variables through the command line options. For example, lets assume that you would like to build separate images for development and production environments and you use to declare that in the image tag. Then, your <code>image_tag</code> section may looks as follows:</p>
+<pre><code class="language-toml">[tool.docker]
+image_tags = [
+    &quot;org/@(context)/@(name):latest&quot;,
+    &quot;org/@(context)/@(name):@(version)&quot;,
+    &quot;org/@(context)/@(name):@(sha)&quot;
+]
+expose = [8888]
+cmd = [&quot;service&quot;]
+</code></pre>
+<p>By default, the plugin does not know the value for the variable <strong>@(context)</strong>. However, you can provide the value using the command line option <code>--var</code>. For instance, in order to tag the image for the development context you may type:</p>
+<pre><code class="language-bash">poetry docker --var=context:dev
+</code></pre>
+<p>then, the plugin should produce the following three tags:</p>
+<ol>
+<li><code>docker.io/dev/example_ml_project:latest</code></li>
+<li><code>docker.io/dev/example_ml_project:1.0.0</code></li>
+<li><code>docker.io/dev/example_ml_project:7515162</code></li>
+</ol>
+<h2 id="build-arguments">Build arguments</h2>
+<p>The plugin supports docker build arguments using the <code>args</code> command. These arguments can be used in the docker image configuration using the standard bash variable syntax <code>${VAR}</code>. For example consider an image that we would like to build for different python versions.</p>
+<pre><code class="language-toml">[tool.docker]
+args = { python_version = &quot;@(py_version)&quot; }
+image_tags = [
+    &quot;org/@(context)/@(name):latest&quot;,
+    &quot;org/@(context)/@(name):@(version)&quot;,
+    &quot;org/@(context)/@(name):@(sha)&quot;
+]
+from = &quot;python:${python_version}&quot;
+expose = [8888]
+cmd = [&quot;service&quot;]
+</code></pre>
+<p>Note that by default the value of the argument <code>python_version</code> is the value of the build-in variable <strong>@(py_version)</strong>, which equals to the project version. However, the <code>python_version</code> argument value can changed using the command line option <code>--arg</code>, which is similar to the option <code>--var</code>.</p>
+<blockquote>
+<p>Docker build arguments and user-defined variables may seem very similar and you may argue that variables are not useful. In practice, variables provide a way to access important values declared in the <code>pyproject.toml</code> from inside the Dockerfile. Moreover, they provide a way to dynamically declare docker tags which are not declared inside the Dockerfile.</p>
+</blockquote>
+<h2 id="multi-platform-builds">Multi-platform builds</h2>
+<p>Often, there is a need to build images for a different target platform than the one building the image or even cross-build images for multiple platforms. The most common use case I think is both for <code>linux/amd64</code> and <code>linux/arm64</code>. The plugin provides a simple command line option:</p>
+<pre><code class="language-bash">poetry docker --platform linux/amd64 --platform linux/arm64
+</code></pre>
+<h2 id="command-line-options">Command-Line options</h2>
+<p>All command line options provided by the <code>poetry-docker-plugin</code> may be accessed by typing:</p>
+<pre><code class="language-bash">poetry docker --help
+</code></pre>
+<pre><code>--dockerfile-only          Creates Dockerfile, but does not build the image.
+--build-only[=BUILD-ONLY]  Builds only selected images. (multiple values allowed)
+-p, --platform[=PLATFORM]  Sets a target platform. (multiple values allowed)
+--exclude-package          Does not install project package inside docker container.
+--push                     Pushes the image to the registry.
+-r, --var[=VAR]            Declares a custom variable using the syntax 'name:value'. Then, the variable can be used in the docker configuration using: @(name). (multiple values allowed)
+-a, --arg[=ARG]            Declares a build argument using the syntax 'name:value' (multiple values allowed)
+</code></pre>
+<h2 id="license">License</h2>
+<p>This project is licensed under the terms of the MIT license.</p></div>
+            </div>
+        </div>
+
+        <footer class="col-md-12">
+            <hr>
+            <p>Documentation built with <a href="https://www.mkdocs.org/">MkDocs</a>.</p>
+        </footer>
+        <script>
+            var base_url = ".",
+                shortcuts = {"help": 191, "next": 78, "previous": 80, "search": 83};
+        </script>
+        <script src="js/base.js" defer></script>
+        <script src="search/main.js" defer></script>
+
+        <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="searchModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="searchModalLabel">Search</h4>
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+            </div>
+            <div class="modal-body">
+                <p>From here you can search these documents. Enter your search terms below.</p>
+                <form>
+                    <div class="form-group">
+                        <input type="search" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
+                    </div>
+                </form>
+                <div id="mkdocs-search-results" data-no-results-text="No results found"></div>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div><div class="modal" id="mkdocs_keyboard_modal" tabindex="-1" role="dialog" aria-labelledby="keyboardModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="keyboardModalLabel">Keyboard Shortcuts</h4>
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+            </div>
+            <div class="modal-body">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th style="width: 20%;">Keys</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="help shortcut"><kbd>?</kbd></td>
+                    <td>Open this help</td>
+                  </tr>
+                  <tr>
+                    <td class="next shortcut"><kbd>n</kbd></td>
+                    <td>Next page</td>
+                  </tr>
+                  <tr>
+                    <td class="prev shortcut"><kbd>p</kbd></td>
+                    <td>Previous page</td>
+                  </tr>
+                  <tr>
+                    <td class="search shortcut"><kbd>s</kbd></td>
+                    <td>Search</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>
+
+    </body>
+</html>
+
+<!--
+MkDocs version : 1.4.2
+Build Date UTC : 2023-04-30 10:59:44.004040+00:00
+-->
