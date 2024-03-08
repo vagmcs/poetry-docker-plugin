@@ -268,7 +268,7 @@ class DockerFile(object):
         self,
         image_tags: List[str],
         platform: List[str],
-        arguments: Dict[str, str] = None,
+        arguments: Optional[Dict[str, str]] = None,
         dockerfile_name: str = "Dockerfile",
         push: bool = False,
     ) -> None:
@@ -341,7 +341,7 @@ class DockerFile(object):
             )
 
         if result.returncode == 0:
-            self._io.write_line(f"<info>[INFO]:</info> Image tags successfully created!")
+            self._io.write_line("<info>[INFO]:</info> Image tags successfully created!")
 
         if push and len(platform) > 1:
             subprocess.run(

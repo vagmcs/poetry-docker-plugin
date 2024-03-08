@@ -142,12 +142,12 @@ class DockerBuild(Command):
             self.warning("Python version is too generic, using system's running version.")
             python_version = f"{sys.version_info.major}.{sys.version_info.minor}"
         elif re.match("[\\^~]?(\\d\\.\\d+)(\\.\\d+)?", full_python_version) is not None:
-            python_version = re.match("[\\^~]?(\\d\\.\\d+)(\\.\\d+)?", full_python_version).group(1)
+            python_version = re.match("[\\^~]?(\\d\\.\\d+)(\\.\\d+)?", full_python_version).group(1)  # type: ignore
         elif re.match("[\\^~]?(\\d)(\\.\\*)?", full_python_version) is not None:
-            python_version = re.match("[\\^~]?(\\d)(\\.\\*)?", full_python_version).group(1)
+            python_version = re.match("[\\^~]?(\\d)(\\.\\*)?", full_python_version).group(1)  # type: ignore
         else:
             match = re.match(">=?(\\d\\.\\d+)(\\.\\d+)?,<=?(\\d\\.\\d+)(\\.\\d+)?", full_python_version)
-            python_version = match.group(1)
+            python_version = match.group(1)  # type: ignore
             self.warning(
                 f"Found a range of compatible Python versions '{full_python_version}', "
                 f"using the oldest for building the image '{python_version}'."
