@@ -85,7 +85,7 @@ Poetry docker plugin supports most of the commands you can use in a [Dockerfile]
 
 ```toml
 [tool.docker]
-image_tags = [
+tags = [
     "evangelos/simple_service:1.0.0",
     "evangelos/simple_service:latest",
 ]
@@ -108,7 +108,7 @@ expose = [8888, 9999]
 cmd = ["service", "--verbose"] # you may also use entrypoint = []
 ```
 
-* `image_tags` declare a list of tags for the resulting image.
+* `tags` declare a list of tags for the resulting image.
 * `args` declare Dockerfile [arguments](https://docs.docker.com/engine/reference/builder/#arg) and their default values. Default values are mandatory.
 * `from` declares the base image. If [from](https://docs.docker.com/engine/reference/builder/#from) command is omitted, the plugin automatically figures out the python version of the project and use it as the base image.
 * `labels` declare a dictionary of metadata for the image.
@@ -187,7 +187,7 @@ These variables may be used anywhere in the `[tool.docker]` section of `pyprojec
 
 ```toml
 [tool.docker]
-image_tags = [
+tags = [
     "org/@(name):latest",
     "org/@(name):@(version)",
     "org/@(name):@(sha)"
@@ -207,7 +207,7 @@ The plugin also allows user-defined variables through the command line options. 
 
 ```toml
 [tool.docker]
-image_tags = [
+tags = [
     "org/@(context)/@(name):latest",
     "org/@(context)/@(name):@(version)",
     "org/@(context)/@(name):@(sha)"
@@ -235,7 +235,7 @@ The plugin supports docker build arguments using the `args` command. These argum
 ```toml
 [tool.docker]
 args = { python_version = "@(py_version)" }
-image_tags = [
+tags = [
     "org/@(context)/@(name):latest",
     "org/@(context)/@(name):@(version)",
     "org/@(context)/@(name):@(sha)"
