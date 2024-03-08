@@ -143,8 +143,15 @@ class DockerBuild(Command):
             python_version = f"{sys.version_info.major}.{sys.version_info.minor}"
         elif re.match("[\\^~]?(\\d\\.\\d+)(\\.\\d+)?", full_python_version) is not None:
             python_version = re.match("[\\^~]?(\\d\\.\\d+)(\\.\\d+)?", full_python_version).group(1)
-        else:
+        elif re.match("[\\^~]?(\\d)(\\.\\*)?", full_python_version) is not None:
             python_version = re.match("[\\^~]?(\\d)(\\.\\*)?", full_python_version).group(1)
+        else:
+            match = re.match(">=?(\\d\\.\\d+)(\\.\\d+)?,<=?(\\d\\.\\d+)(\\.\\d+)?", full_python_version)
+            python_version = match.group(1)
+            self.warning(
+                f"Found a range of compatible Python versions '{full_python_version}', "
+                f"using the oldest for building the image '{python_version}'."
+            )
 
         # try to retrieve commit SHA-256
         commit_sha = None
