@@ -8,7 +8,7 @@
         
         
         <link rel="shortcut icon" href="../../img/favicon.ico">
-        <title>0.5.0 - Poetry Docker</title>
+        <title>0.5.1 - Poetry Docker</title>
         <link href="../../css/bootstrap.min.css" rel="stylesheet">
         <link href="../../css/font-awesome.min.css" rel="stylesheet">
         <link href="../../css/base.css" rel="stylesheet">
@@ -38,11 +38,11 @@
                                 <ul class="dropdown-menu">
                                     
 <li>
-    <a href="../0.5.1/" class="dropdown-item">0.5.1</a>
+    <a href="./" class="dropdown-item active">0.5.1</a>
 </li>
                                     
 <li>
-    <a href="./" class="dropdown-item active">0.5.0</a>
+    <a href="../0.5.0/" class="dropdown-item">0.5.0</a>
 </li>
                                     
 <li>
@@ -59,12 +59,12 @@
                             </a>
                         </li>
                             <li class="nav-item">
-                                <a rel="prev" href="../0.5.1/" class="nav-link">
+                                <a rel="prev" href="../.." class="nav-link">
                                     <i class="fa fa-arrow-left"></i> Previous
                                 </a>
                             </li>
                             <li class="nav-item">
-                                <a rel="next" href="../0.4.0/" class="nav-link">
+                                <a rel="next" href="../0.5.0/" class="nav-link">
                                     Next <i class="fa fa-arrow-right"></i>
                                 </a>
                             </li>
@@ -93,29 +93,18 @@
 </div></div>
                     <div class="col-md-9" role="main">
 
-<h3 id="features">Features</h3>
+<h3 id="documentation">Documentation</h3>
 <ul>
-<li>✨Adds proper multi-platform support.</li>
-<li>✨Adds <code>dockerfile-only</code> command line option for generating the Dockerfiles without building the images. </li>
-<li>✨Adds <code>arg</code> CLI option for defining build arguments.</li>
-<li>✨Adds <code>build-only</code> argument for building a subset of images (when multiple images are configured).</li>
-<li>✨Adds support for multiple tags.</li>
-<li>✨Adds support for build-in variables:</li>
-<li>Project name <code>@(name)</code> and version <code>@(version)</code>. </li>
-<li>Python version <code>@(py_version)</code>.</li>
-<li>Commit SHA <code>@(sha)</code>.</li>
-<li>✨Adds <code>var</code> CLI option for user-defined variables</li>
-<li>✨Adds <code>push</code> CLI option for pushing images</li>
+<li>📜Renames <code>image_tags</code> to <code>tags</code>.</li>
 </ul>
 <h3 id="fixes">Fixes</h3>
 <ul>
-<li>🐛Corrects python version parsing.</li>
+<li>🐛Properly support python version ranges.</li>
+<li>🐛Raises error for undefined user variables.</li>
 </ul>
 <h3 id="build">Build</h3>
 <ul>
-<li>🔧Moves commitizen configuration inside <code>pyproject.toml</code>.</li>
-<li>🔧Updates dependency versions.</li>
-<li>🔧Adds a git push tag command to Makefile.</li>
+<li>🔧Adds Makefile commands for generating changelog and publishing the project.</li>
 </ul></div>
             </div>
         </div>

@@ -12,12 +12,9 @@
         <link href="css/bootstrap.min.css" rel="stylesheet">
         <link href="css/font-awesome.min.css" rel="stylesheet">
         <link href="css/base.css" rel="stylesheet">
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/styles/github.min.css">
-
-        <script src="js/jquery-1.10.2.min.js" defer></script>
-        <script src="js/bootstrap.min.js" defer></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/highlight.min.js"></script>
-        <script>hljs.initHighlightingOnLoad();</script> 
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+        <script>hljs.highlightAll();</script> 
     </head>
 
     <body class="homepage">
@@ -39,6 +36,10 @@
                             <li class="dropdown">
                                 <a href="#" class="nav-link dropdown-toggle" data-toggle="dropdown">Release Notes <b class="caret"></b></a>
                                 <ul class="dropdown-menu">
+                                    
+<li>
+    <a href="release_notes/0.5.1/" class="dropdown-item">0.5.1</a>
+</li>
                                     
 <li>
     <a href="release_notes/0.5.0/" class="dropdown-item">0.5.0</a>
@@ -63,7 +64,7 @@
                                 </a>
                             </li>
                             <li class="nav-item">
-                                <a rel="next" href="release_notes/0.5.0/" class="nav-link">
+                                <a rel="next" href="release_notes/0.5.1/" class="nav-link">
                                     Next <i class="fa fa-arrow-right"></i>
                                 </a>
                             </li>
@@ -192,7 +193,7 @@ cmd = [&quot;service&quot;]
 <h2 id="configuration-overview">Configuration Overview</h2>
 <p>Poetry docker plugin supports most of the commands you can use in a <a href="https://docs.docker.com/engine/reference/builder">Dockerfile</a>. Here is a full configuration the demonstrates all available commands:</p>
 <pre><code class="language-toml">[tool.docker]
-image_tags = [
+tags = [
     &quot;evangelos/simple_service:1.0.0&quot;,
     &quot;evangelos/simple_service:latest&quot;,
 ]
@@ -215,7 +216,7 @@ expose = [8888, 9999]
 cmd = [&quot;service&quot;, &quot;--verbose&quot;] # you may also use entrypoint = []
 </code></pre>
 <ul>
-<li><code>image_tags</code> declare a list of tags for the resulting image.</li>
+<li><code>tags</code> declare a list of tags for the resulting image.</li>
 <li><code>args</code> declare Dockerfile <a href="https://docs.docker.com/engine/reference/builder/#arg">arguments</a> and their default values. Default values are mandatory.</li>
 <li><code>from</code> declares the base image. If <a href="https://docs.docker.com/engine/reference/builder/#from">from</a> command is omitted, the plugin automatically figures out the python version of the project and use it as the base image.</li>
 <li><code>labels</code> declare a dictionary of metadata for the image.</li>
@@ -273,7 +274,7 @@ cmd = [&quot;trainer&quot;]
 </ul>
 <p>These variables may be used anywhere in the <code>[tool.docker]</code> section of <code>pyproject.toml</code> and they should be replaced by their actual value during the build process. For instance,</p>
 <pre><code class="language-toml">[tool.docker]
-image_tags = [
+tags = [
     &quot;org/@(name):latest&quot;,
     &quot;org/@(name):@(version)&quot;,
     &quot;org/@(name):@(sha)&quot;
@@ -290,7 +291,7 @@ cmd = [&quot;service&quot;]
 </ol>
 <p>The plugin also allows user-defined variables through the command line options. For example, lets assume that you would like to build separate images for development and production environments and you use to declare that in the image tag. Then, your <code>image_tag</code> section may looks as follows:</p>
 <pre><code class="language-toml">[tool.docker]
-image_tags = [
+tags = [
     &quot;org/@(context)/@(name):latest&quot;,
     &quot;org/@(context)/@(name):@(version)&quot;,
     &quot;org/@(context)/@(name):@(sha)&quot;
@@ -311,7 +312,7 @@ cmd = [&quot;service&quot;]
 <p>The plugin supports docker build arguments using the <code>args</code> command. These arguments can be used in the docker image configuration using the standard bash variable syntax <code>${VAR}</code>. For example consider an image that we would like to build for different python versions.</p>
 <pre><code class="language-toml">[tool.docker]
 args = { python_version = &quot;@(py_version)&quot; }
-image_tags = [
+tags = [
     &quot;org/@(context)/@(name):latest&quot;,
     &quot;org/@(context)/@(name):@(version)&quot;,
     &quot;org/@(context)/@(name):@(sha)&quot;
@@ -349,12 +350,14 @@ cmd = [&quot;service&quot;]
             <hr>
             <p>Documentation built with <a href="https://www.mkdocs.org/">MkDocs</a>.</p>
         </footer>
+        <script src="js/jquery-3.6.0.min.js"></script>
+        <script src="js/bootstrap.min.js"></script>
         <script>
             var base_url = ".",
                 shortcuts = {"help": 191, "next": 78, "previous": 80, "search": 83};
         </script>
-        <script src="js/base.js" defer></script>
-        <script src="search/main.js" defer></script>
+        <script src="js/base.js"></script>
+        <script src="search/main.js"></script>
 
         <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="searchModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
@@ -421,6 +424,6 @@ cmd = [&quot;service&quot;]
 </html>
 
 <!--
-MkDocs version : 1.4.2
-Build Date UTC : 2023-04-30 10:59:44.004040+00:00
+MkDocs version : 1.5.3
+Build Date UTC : 2024-03-08 17:13:59.120304+00:00
 -->
