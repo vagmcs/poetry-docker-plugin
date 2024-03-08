@@ -210,6 +210,10 @@ class DockerBuild(Command):
             for var, val in variables.items():
                 _text = _text.replace(f"@({var})", val)
 
+            undeclared_vars = re.findall(r"@\([a-zA-Z_]+\)", _text)
+            if undeclared_vars:
+                self.error(f"No value found for variables '{', '.join(undeclared_vars)}'.")
+
             return _text
 
         exclude_package: bool = self.option("exclude-package")
