@@ -241,3 +241,23 @@ dmypy.json
 
 # Cython debug symbols
 cython_debug/
+
+# MkDocs
+mkdocs/site
+
+### VSCode
+
+.vscode
+
+# Local History for Visual Studio Code
+.history/
+
+# Built Visual Studio Code Extensions
+*.vsix
+
+### Metals
+
+.metals/
+.bloop/
+project/metals.sbt
+

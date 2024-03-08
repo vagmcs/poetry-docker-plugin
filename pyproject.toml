@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "poetry-docker-plugin"
-version = "0.5.0"
+version = "0.5.1a0"
 description = "A poetry plugin for configure and build docker images."
 authors = ["Evangelos Michelioudakis <vagmcs@gmail.com>"]
 license = "MIT"
@@ -36,7 +36,7 @@ packages = [
 ]
 
 [tool.poetry.dependencies]
-python = "^3.7"
+python = "^3.8"
 poetry = "^1.2.0"
 gitpython = "^3.1.31"
 
@@ -51,7 +51,7 @@ mkdocs = "^1.4.2"
 
 # enforce types for safety using mypy
 [tool.mypy]
-python_version = 3.9
+python_version = "3.8"
 exclude = ['.venv', 'dist']
 
 pretty = true
@@ -86,7 +86,7 @@ implicit_reexport = true
 # code style using black and isort
 [tool.black]
 line_length = 120
-target_version = ["py39"]
+target_version = ["py38"]
 color = true
 
 [tool.isort]
@@ -107,7 +107,7 @@ import_heading_firstparty="Project"
 
 [tool.ruff]
 line-length = 120
-target-version = "py39"
+target-version = "py38"
 
 # Exclude a variety of commonly ignored directories
 exclude = [
