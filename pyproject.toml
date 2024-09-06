@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "poetry-docker-plugin"
-version = "0.5.1"
+version = "0.6.1"
 description = "A poetry plugin for configure and build docker images."
 authors = ["Evangelos Michelioudakis <vagmcs@gmail.com>"]
 license = "MIT"
@@ -108,7 +108,6 @@ import_heading_firstparty="Project"
 [tool.ruff]
 line-length = 120
 target-version = "py38"
-src = ["poetry_docker_plugin", "tests"]
 
 # Exclude a variety of commonly ignored directories
 exclude = [
