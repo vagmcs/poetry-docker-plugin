@@ -19,8 +19,8 @@ clean:
 ### format         : Format source
 .PHONY: format
 format:
-	@poetry run isort poetry_docker_plugin
-	@poetry run black poetry_docker_plugin
+	@poetry run isort poetry_docker_plugin tests
+	@poetry run black poetry_docker_plugin tests
 
 ### compile        : Apply code styling and perform type checks
 .PHONY: compile
@@ -28,12 +28,16 @@ compile: format
 	@poetry check
 	@poetry run ruff check --diff --no-fix poetry_docker_plugin tests
 	@poetry run ruff format --check --diff poetry_docker_plugin tests
-	@poetry run pytest
 	@poetry run mypy poetry_docker_plugin tests
+
+### test           : Run tests
+.PHONY: test
+test:
+	@poetry run pytest
 
 ### build          : Compile, run tests and package
 .PHONY: build
-build: compile
+build: compile test
 	@poetry build
 
 _bump_version:
