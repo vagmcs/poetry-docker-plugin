@@ -1,17 +1,5 @@
-from poetry_docker_plugin import (
-    Arg,
-    Cmd,
-    Copy,
-    EntryPoint,
-    Env,
-    Expose,
-    From,
-    Labels,
-    Run,
-    User,
-    Volume,
-    WorkDir,
-)
+# Project
+from poetry_docker_plugin import Arg, Cmd, Copy, EntryPoint, Env, Expose, From, Labels, Run, User, Volume, WorkDir
 from poetry_docker_plugin.docker_builder import BuildCommand, PushCommand
 
 
@@ -90,7 +78,7 @@ def test_cmd_with_one_arg() -> None:
     assert str(cmd) == 'CMD ["echo"]'
 
 
-def test_cmnd_with_two_args() -> None:
+def test_cmd_with_two_args() -> None:
     cmd = Cmd(args=["echo", "Hello, World!"])
     assert str(cmd) == 'CMD ["echo", "Hello, World!"]'
 
