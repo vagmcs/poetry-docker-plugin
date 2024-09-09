@@ -283,80 +283,21 @@ class DockerFile(object):
         """
         self.create(dockerfile_name)
 
-        if not platform:
-            # when there are no platforms specified, use standard build command
-            result = subprocess.run(
-                [
-                    "docker",
-                    "build",
-                    "--no-cache",
-                    *[f"--build-arg={arg}={value}" for arg, value in ({} if arguments is None else arguments).items()],
-                    *[arg for tag in image_tags for arg in ["--tag", tag]],
-                    "--file",
-                    f"dist/{dockerfile_name}",
-                    os.path.abspath("dist"),
-                ],
-                stdin=subprocess.PIPE,
-                stdout=subprocess.PIPE,
-                universal_newlines=True,
-            )
-        elif len(platform) < 2:
-            # when there is one platform specified, use cross-build command and load the image into docker
-            result = subprocess.run(
-                [
-                    "docker",
-                    "buildx",
-                    "build",
-                    "--load",
-                    "--no-cache",
-                    f"--platform={platform[0]}",
-                    *[f"--build-arg={arg}={value}" for arg, value in ({} if arguments is None else arguments).items()],
-                    *[arg for tag in image_tags for arg in ["--tag", tag]],
-                    "--file",
-                    f"dist/{dockerfile_name}",
-                    os.path.abspath("dist"),
-                ],
-                stdin=subprocess.PIPE,
-                stdout=subprocess.PIPE,
-                universal_newlines=True,
-            )
-        else:
-            # when there is more than one platform specified, use cross-build command and keep images in build cache
-            result = subprocess.run(
-                [
-                    "docker",
-                    "buildx",
-                    "build",
-                    "--no-cache",
-                    f"--platform={','.join(platform)}",
-                    *[f"--build-arg={arg}={value}" for arg, value in ({} if arguments is None else arguments).items()],
-                    *[arg for tag in image_tags for arg in ["--tag", tag]],
-                    "--file",
-                    f"dist/{dockerfile_name}",
-                    os.path.abspath("dist"),
-                ],
-                stdin=subprocess.PIPE,
-                stdout=subprocess.PIPE,
-                universal_newlines=True,
-            )
+        build_command = BuildCommand(image_tags, platform, arguments, dockerfile_name)
+        result = subprocess.run(
+            build_command.command(),
+            stdin=subprocess.PIPE,
+            stdout=subprocess.PIPE,
+            universal_newlines=True,
+        )
 
         if result.returncode == 0:
             self._io.write_line("<info>[INFO]:</info> Image tags successfully created!")
 
         if push and len(platform) > 1:
+            push_command = PushCommand(image_tags, platform, arguments, dockerfile_name)
             subprocess.run(
-                [
-                    "docker",
-                    "buildx",
-                    "build",
-                    "--push",
-                    f"--platform={platform}",
-                    *[f"--build-arg={arg}={value}" for arg, value in ({} if arguments is None else arguments).items()],
-                    *[arg for tag in image_tags for arg in ["--tag", tag]],
-                    "--file",
-                    f"dist/{dockerfile_name}",
-                    os.path.abspath("dist"),
-                ],
+                push_command.command(),
                 stdin=subprocess.PIPE,
                 stdout=subprocess.PIPE,
                 universal_newlines=True,
@@ -381,3 +322,89 @@ class DockerFile(object):
             self._io.write_line(f"<info>[INFO]:</info> Image tag '{image_tag}' was successfully pushed!")
         else:
             raise RuntimeError(f"Failed to push image tag '{image_tag}'.")
+
+
+class BuildCommand:
+    def __init__(
+        self,
+        image_tags: List[str],
+        platform: List[str],
+        arguments: Optional[Dict[str, str]] = None,
+        dockerfile_name: str = "Dockerfile",
+    ) -> None:
+        self.arguments = arguments
+        self.image_tags = image_tags
+        self.dockerfile_name = dockerfile_name
+        self.platform = platform
+
+    def command(self) -> List[str]:
+        common_args = [
+            *[
+                f"--build-arg={arg}={value}"
+                for arg, value in ({} if self.arguments is None else self.arguments).items()
+            ],
+            *[arg for tag in self.image_tags for arg in ["--tag", tag]],
+            "--file",
+            f"dist/{self.dockerfile_name}",
+            os.path.abspath("dist"),
+        ]
+        if not self.platform:
+            # when there are no platforms specified, use standard build command
+
+            return [
+                "docker",
+                "build",
+                "--no-cache",
+            ] + common_args
+
+        if len(self.platform) < 2:
+            # when there is one platform specified, use cross-build command and load the image into docker
+
+            return [
+                "docker",
+                "buildx",
+                "build",
+                "--load",
+                "--no-cache",
+                f"--platform={self.platform[0]}",
+            ] + common_args
+
+        # when there is more than one platform specified, use cross-build command and keep images in build cache
+        return [
+            "docker",
+            "buildx",
+            "build",
+            "--no-cache",
+            f"--platform={','.join(self.platform)}",
+        ] + common_args
+
+
+class PushCommand:
+    def __init__(
+        self,
+        image_tags: List[str],
+        platform: List[str],
+        arguments: Optional[Dict[str, str]] = None,
+        dockerfile_name: str = "Dockerfile",
+    ) -> None:
+        self.arguments = arguments
+        self.image_tags = image_tags
+        self.dockerfile_name = dockerfile_name
+        self.platform = platform
+
+    def command(self) -> List[str]:
+        return [
+            "docker",
+            "buildx",
+            "build",
+            "--push",
+            f"--platform={','.join(self.platform)}",
+            *[
+                f"--build-arg={arg}={value}"
+                for arg, value in ({} if self.arguments is None else self.arguments).items()
+            ],
+            *[arg for tag in self.image_tags for arg in ["--tag", tag]],
+            "--file",
+            f"dist/{self.dockerfile_name}",
+            os.path.abspath("dist"),
+        ]

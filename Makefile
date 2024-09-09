@@ -26,8 +26,10 @@ format:
 .PHONY: compile
 compile: format
 	@poetry check
-	@poetry run ruff poetry_docker_plugin
-	@poetry run mypy poetry_docker_plugin
+	@poetry run ruff check --diff --no-fix poetry_docker_plugin tests
+	@poetry run ruff format --check --diff poetry_docker_plugin tests
+	@poetry run pytest
+	@poetry run mypy poetry_docker_plugin tests
 
 ### build          : Compile, run tests and package
 .PHONY: build
