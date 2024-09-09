@@ -41,7 +41,7 @@ build: compile test
 	@poetry build
 
 _bump_version:
-	@poetry version minor
+	@poetry version patch
 
 ### changelog      : Create changelogs
 .PHONY: changelog
