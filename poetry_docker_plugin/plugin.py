@@ -136,6 +136,7 @@ class DockerBuild(Command):
         project_version = pyproject_config.get("tool").get("poetry").get("version")
         project_authors = pyproject_config.get("tool").get("poetry").get("authors")
         full_python_version = pyproject_config.get("tool").get("poetry").get("dependencies").get("python")
+        package_mode = pyproject_config.get("tool").get("poetry").get("package-mode", True)  # if None assume to be True
 
         # parse Python version
         if full_python_version == "*":
@@ -175,7 +176,7 @@ class DockerBuild(Command):
             user_arguments[_arg[0]] = _arg[1]
 
         # package the project, unless exclude-package option is specified
-        if not self.option("exclude-package"):
+        if not self.option("exclude-package") and package_mode:
             self.call("build")
 
         for config_name in multiple_images:
@@ -185,6 +186,7 @@ class DockerBuild(Command):
                 project_version,
                 project_authors,
                 python_version,
+                package_mode,
                 commit_sha,
                 user_variables,
                 user_arguments,
@@ -200,6 +202,7 @@ class DockerBuild(Command):
         project_version: str,
         project_authors: List[str],
         python_version: str,
+        package_mode: bool,
         commit_sha: Optional[str],
         variables: Dict[str, str],
         user_arguments: Dict[str, str],
@@ -273,7 +276,7 @@ class DockerBuild(Command):
         # Append COPY commands
         copy_statements: List[Dict[str, str]] = image_config.get("copy", dict())
         # unless excluded copy the distribution package into the container
-        if not exclude_package:
+        if not exclude_package and package_mode:
             docker_file.add(
                 Copy(
                     f"{project_name.replace('-', '_')}-{project_version}.tar.gz",
@@ -303,7 +306,7 @@ class DockerBuild(Command):
         # Append WORKDIR, USER, and RUN commands
         flow = image_config.get("flow", list())
         # unless excluded, install package
-        if not exclude_package:
+        if not exclude_package and package_mode:
             docker_file.add(Run(f"pip install /package/{project_name.replace('-', '_')}-{project_version}.tar.gz"))
         for instruction in flow:
             if "work_dir" in instruction:
