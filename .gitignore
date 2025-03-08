@@ -245,6 +245,9 @@ cython_debug/
 # MkDocs
 mkdocs/site
 
+# Ruff
+.ruff_cache
+
 ### VSCode
 
 .vscode

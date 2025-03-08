@@ -2,92 +2,89 @@
 name = "poetry-docker-plugin"
 version = "0.5.3"
 description = "A poetry plugin for configure and build docker images."
-authors = ["Evangelos Michelioudakis <vagmcs@gmail.com>"]
+authors = [ "Evangelos Michelioudakis <vagmcs@gmail.com>" ]
 license = "MIT"
 readme = "README.md"
-keywords = ["poetry", "packaging", "docker"]
+keywords = [ "poetry", "packaging", "docker" ]
 repository = "https://github.com/vagmcs/poetry-docker-plugin"
 documentation = "https://github.com/vagmcs/poetry-docker-plugin"
 classifiers = [
-    "Intended Audience :: Developers",
-    "Intended Audience :: Information Technology",
-    "Intended Audience :: System Administrators",
-    "Operating System :: OS Independent",
-    "Programming Language :: Python",
-    "Programming Language :: Python :: 3",
-    "Topic :: Software Development",
-    "Topic :: Software Development :: Libraries",
-    "Topic :: Software Development :: Libraries :: Python Modules",
-    "Topic :: Software Development :: Libraries :: Application Frameworks",
-    "Topic :: Software Development :: Version Control :: Git",
-    "Topic :: System :: Archiving :: Packaging",
-    "Topic :: System :: Installation/Setup",
-    "Topic :: System :: Software Distribution",
-    "Programming Language :: Python :: 3 :: Only",
-    "Programming Language :: Python :: 3.7",
-    "Programming Language :: Python :: 3.8",
-    "Programming Language :: Python :: 3.9",
-    "Programming Language :: Python :: 3.10",
-    "License :: OSI Approved :: MIT License"
+"Intended Audience :: Developers",
+"Intended Audience :: Information Technology",
+"Intended Audience :: System Administrators",
+"Operating System :: OS Independent",
+"Topic :: Software Development",
+"Topic :: Software Development :: Libraries",
+"Topic :: Software Development :: Libraries :: Python Modules",
+"Topic :: Software Development :: Libraries :: Application Frameworks",
+"Topic :: Software Development :: Version Control :: Git",
+"Topic :: System :: Archiving :: Packaging",
+"Topic :: System :: Installation/Setup",
+"Topic :: System :: Software Distribution",
+"Programming Language :: Python",
+"Programming Language :: Python :: 3",
+"Programming Language :: Python :: 3 :: Only",
+"Programming Language :: Python :: 3.9",
+"Programming Language :: Python :: 3.10",
+"Programming Language :: Python :: 3.11",
+"Programming Language :: Python :: 3.12",
+"Programming Language :: Python :: 3.13",
+"License :: OSI Approved :: MIT License"
 ]
 
-packages = [
-    { include = "poetry_docker_plugin" }
-]
+
+[[tool.poetry.packages]]
+include = "poetry_docker_plugin"
+
 
 [tool.poetry.dependencies]
-python = "^3.8"
-poetry = "^1.2.0"
-gitpython = "^3.1.31"
+python = "^3.9"
+poetry = ">=1.8.0,<3.0.0"
+gitpython = "^3.1.44"
+
 
 [tool.poetry.group.dev.dependencies]
-black = "^23.3.0"
-mypy = "^1.11.1"
-pytest = "^8.3.2"
-ruff = "^0.6.4"
-isort = "^5.10.1"
-commitizen = "^3.1.1"
-mkdocs = "^1.4.2"
+black = "^25.1.0"
+mypy = "^1.15.0"
+pytest = "^8.3.5"
+ruff = "^0.9.10"
+isort = "^6.0.1"
+commitizen = "^4.4.1"
+mkdocs = "^1.6.1"
 
-# enforce types for safety using mypy
+
+[tool.poetry.plugins."poetry.application.plugin"]
+docker = "poetry_docker_plugin.plugin:DockerPlugin"
+
+
 [tool.mypy]
-python_version = "3.8"
-exclude = ['.venv', 'dist']
-
+python_version = "3.9"
+exclude = [ ".venv", "dist" ]
 pretty = true
 show_column_numbers = true
 show_error_codes = true
 show_error_context = true
-
-# warnings
 warn_unused_configs = true
 warn_redundant_casts = true
 warn_return_any = true
 warn_unreachable = true
 warn_unused_ignores = true
 warn_no_return = true
-
-# import discovery
 ignore_missing_imports = true
-
-# disallow dynamic typing
 disallow_untyped_defs = true
 disallow_incomplete_defs = true
 disallow_untyped_decorators = true
 check_untyped_defs = true
-
-# none and optional
 no_implicit_optional = true
-
-# strictness flags
 strict_equality = true
 implicit_reexport = true
 
-# code style using black and isort
+
 [tool.black]
 line_length = 120
-target_version = ["py38"]
+target_version = [ "py39", "py310", "py311", "py312", "py313" ]
 color = true
+
 
 [tool.isort]
 profile = "black"
@@ -96,65 +93,90 @@ multi_line_output = 3
 use_parentheses = true
 include_trailing_comma = true
 color_output = true
+sections = [
+"FUTURE",
+"TYPING",
+"STDLIB",
+"THIRDPARTY",
+"FIRSTPARTY",
+"LOCALFOLDER"
+]
+known_typing = "typing"
+import_heading_future = "Futures"
+import_heading_stdlib = "Standard Library"
+import_heading_typing = "Types"
+import_heading_thirdparty = "Dependencies"
+import_heading_firstparty = "Project"
 
-sections = ["FUTURE", "TYPING", "STDLIB", "THIRDPARTY", "FIRSTPARTY", "LOCALFOLDER"]
-known_typing = ["typing", "types", "typing_extensions", "mypy", "mypy_extensions"]
-import_heading_future="Futures"
-import_heading_stdlib="Standard Library"
-import_heading_typing="Types"
-import_heading_thirdparty="Dependencies"
-import_heading_firstparty="Project"
 
 [tool.ruff]
 line-length = 120
-target-version = "py38"
-
-# Exclude a variety of commonly ignored directories
+target-version = "py39"
 exclude = [
-    ".generated",
-    ".hypothesis",
-    ".eggs",
-    ".git",
-    ".mypy_cache",
-    ".nox",
-    ".ruff_cache",
-    ".tox",
-    ".venv",
-    "__pypackages__",
-    ".pytest_cache",
-    "build",
-    "dist",
-    "venv",
-    "*.pyi"
+".bzr",
+".direnv",
+".eggs",
+".git",
+".git-rewrite",
+".hg",
+".ipynb_checkpoints",
+".mypy_cache",
+".nox",
+".pants.d",
+".pyenv",
+".pytest_cache",
+".pytype",
+".ruff_cache",
+".svn",
+".tox",
+".venv",
+".vscode",
+"__pypackages__",
+"_build",
+"buck-out",
+"build",
+"dist",
+"node_modules",
+"site-packages",
+"venv"
 ]
 
-[tool.poetry.plugins."poetry.application.plugin"]
-docker = "poetry_docker_plugin.plugin:DockerPlugin"
-
-[build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
 
 [tool.commitizen]
 name = "cz_customize"
 version = "0.2.0"
 tag_format = "v$version"
 
+
 [tool.commitizen.customize]
-change_type_order = ["BREAKING CHANGE", "feat", "build", "fix", "perf", "refactor", "style"]
+change_type_order = [
+"BREAKING CHANGE",
+"feat",
+"build",
+"fix",
+"perf",
+"refactor",
+"style"
+]
 commit_parser = "^(?P<change_type>feature|feat|bug fix|bug|fix|perf|build|ci|docs|refactor):\\s(?P<message>.*)?"
 changelog_pattern = "^(feature|feat|bugfix|bug|fix|perf|build|ci|docs|refactor|perf)?(!)?"
 
+
 [tool.commitizen.customize.change_type_map]
-"feat" = "Features"
-"feature" = "Features"
+feat = "Features"
+feature = "Features"
 "bug fix" = "Fixes"
-"bugfix" = "Fixes"
-"bug" = "Fixes"
-"fix" = "Fixes"
-"ci" = "CI"
-"build" = "Build"
-"docs" = "Documentation"
-"refactor" = "Refactor"
-"perf" = "Performance"
-"style" = "Code style"
+bugfix = "Fixes"
+bug = "Fixes"
+fix = "Fixes"
+ci = "CI"
+build = "Build"
+docs = "Documentation"
+refactor = "Refactor"
+perf = "Performance"
+style = "Code style"
+
+
+[build-system]
+requires = [ "poetry-core" ]
+build-backend = "poetry.core.masonry.api"

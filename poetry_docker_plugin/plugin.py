@@ -180,7 +180,7 @@ class DockerBuild(Command):
             self.call("build")
 
         for config_name in multiple_images:
-            image_config = config if config_name is None else config.get(config_name)  # type: ignore
+            image_config = config if config_name is None else config.get(config_name)
             self._build_image(
                 project_name,
                 project_version,
