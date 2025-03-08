@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "poetry-docker-plugin"
-version = "0.5.3"
+version = "0.5.4"
 description = "A poetry plugin for configure and build docker images."
 authors = [ "Evangelos Michelioudakis <vagmcs@gmail.com>" ]
 license = "MIT"
