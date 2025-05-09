@@ -29,7 +29,7 @@ jobs:
           poetry config virtualenvs.create false
 
       - name: Install Dependencies
-        run: poetry install --only=dev
+        run: poetry install
 
       - name: Lint
         run: make lint
