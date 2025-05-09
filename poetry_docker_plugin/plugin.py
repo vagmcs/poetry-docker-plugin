@@ -1,5 +1,5 @@
 # Types
-from typing import Any, Dict, List, NoReturn, Optional
+from typing import Any, NoReturn, Optional
 
 # Standard Library
 import re
@@ -103,7 +103,7 @@ class DockerBuild(Command):
 
     def handle(self) -> int:
         pyproject_config = self.application.poetry.pyproject.data  # type: ignore
-        config: Dict[str, Any] = pyproject_config.get("tool", dict()).get("docker", dict())
+        config: dict[str, Any] = pyproject_config.get("tool", dict()).get("docker", dict())
 
         # if no configuration exists, then stop execution
         if not config:
@@ -200,13 +200,13 @@ class DockerBuild(Command):
         self,
         project_name: str,
         project_version: str,
-        project_authors: List[str],
+        project_authors: list[str],
         python_version: str,
         package_mode: bool,
         commit_sha: Optional[str],
-        variables: Dict[str, str],
-        user_arguments: Dict[str, str],
-        image_config: Dict[str, Any],
+        variables: dict[str, str],
+        user_arguments: dict[str, str],
+        image_config: dict[str, Any],
         config_name: Optional[str],
     ) -> None:
         def replace_build_in_vars(text: str) -> str:
@@ -270,11 +270,11 @@ class DockerBuild(Command):
             docker_file.add(From(base_image))
 
         # Append all docker LABEL
-        labels: Dict[str, str] = image_config.get("labels", dict())
+        labels: dict[str, str] = image_config.get("labels", dict())
         docker_file.add(Labels(labels))
 
         # Append COPY commands
-        copy_statements: List[Dict[str, str]] = image_config.get("copy", dict())
+        copy_statements: list[dict[str, str]] = image_config.get("copy", dict())
         # unless excluded copy the distribution package into the container
         if not exclude_package and package_mode:
             docker_file.add(

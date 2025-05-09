@@ -243,7 +243,7 @@ dmypy.json
 cython_debug/
 
 # MkDocs
-mkdocs/site
+docs/site
 
 # Ruff
 .ruff_cache
@@ -263,4 +263,3 @@ mkdocs/site
 .metals/
 .bloop/
 project/metals.sbt
-
