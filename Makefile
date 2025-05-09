@@ -2,7 +2,9 @@ SHELL:=/usr/bin/env bash -euo pipefail -c
 .DEFAULT_GOAL := help
 
 CURRENT_DIR:=$(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
-PROJECT_VERSION:=$(shell poetry version | sed -e 's/poetry-docker-plugin[ ]//g')
+PROJECT_NAME:=$(shell poetry version | sed -e 's/[ ].*//g' | tr '-' '_')
+PROJECT_VERSION:=$(shell poetry version | sed -e 's/.*[ ]//g')
+RELEASE_NOTES:=$(shell cat pyproject.toml | grep release_notes_file | sed -e 's/.*=[ ]//g')
 
 .PHONY: help
 help:
@@ -15,48 +17,58 @@ help:
 .PHONY: clean
 clean:
 	@if [ -d "dist" ]; then rm -Rf $(CURRENT_DIR)/dist; fi
+	@if [ -d "docs/site" ]; then rm -Rf $(CURRENT_DIR)/docs/site; fi
 
 ### format         : Format source
 .PHONY: format
 format:
-	@poetry run isort poetry_docker_plugin tests
-	@poetry run black poetry_docker_plugin tests
+	@poetry run pyupgrade --py39-plus **/*.py || true
+	@poetry run isort $(PROJECT_NAME) tests
+	@poetry run ruff format $(PROJECT_NAME) tests
+	@poetry run docformatter $(PROJECT_NAME) tests || true
 
 ### compile        : Apply code styling and perform type checks
-.PHONY: compile
-compile: format
+.PHONY: lint
+lint:
 	@poetry check
-	@poetry run ruff check --diff --no-fix poetry_docker_plugin tests
-	@poetry run ruff format --check --diff poetry_docker_plugin tests
-	@poetry run mypy poetry_docker_plugin tests
+	@poetry run ruff check --fix $(PROJECT_NAME) tests
+	@poetry run mypy $(PROJECT_NAME) tests
 
 ### test           : Run tests
 .PHONY: test
 test:
 	@poetry run pytest
 
-### build          : Compile, run tests and package
+### build          : Run tests, build docs and package
 .PHONY: build
-build: compile test
+build: test
 	@poetry build
+	@poetry run mkdocs build -f docs/mkdocs.yml
 
-_bump_version:
-	@poetry version patch
+### local-docs     : Run local documentation server
+.PHONY: local-docs
+local-docs: build
+	@mkdocs serve -f docs/mkdocs.yml
 
-### changelog      : Create changelogs
-.PHONY: changelog
-changelog: _bump_version
-	$(eval NEXT_VERSION=$(shell poetry version | sed -e 's/poetry-docker-plugin[ ]//g'))
-	@git tag -a v"${NEXT_VERSION}" -m "version ${NEXT_VERSION}"
-	@cz changelog --file-name "mkdocs/docs/release_notes/${NEXT_VERSION}.md" v${NEXT_VERSION}
+### docker         : Build docker image
+.PHONY: docker
+docker:
+	@poetry docker
 
-### publish        : Publish the package
-.PHONY: publish
-publish:
-	$(eval NEXT_VERSION=$(shell poetry version | sed -e 's/poetry-docker-plugin[ ]//g'))
-	@echo "Releasing version '${NEXT_VERSION}'"
-	@poetry publish --build
-	@git push origin v"${NEXT_VERSION}"
-	@gh release create v"${NEXT_VERSION}" -F "mkdocs/docs/release_notes/${NEXT_VERSION}.md" \
-		dist/poetry_docker_plugin-${NEXT_VERSION}.tar.gz \
-		dist/poetry_docker_plugin-${NEXT_VERSION}-py3-none-any.whl
+### bump           : Bump version and generate changelog (INCREMENT can be PATCH, MINOR or MAJOR)
+.PHONY: bump
+bump:
+	@cz changelog --template docs/templates/release_notes.j2 --file-name $(RELEASE_NOTES)
+	@cz bump --yes --increment $(INCREMENT)
+
+### release        : Release the package and documentation
+.PHONY: release
+release: build
+	@echo "Releasing version '$(PROJECT_VERSION)'"
+	@poetry publish
+	@poetry run mkdocs gh-deploy
+	@gh release create \
+		--verify-tag $(PROJECT_VERSION) \
+		--notes-file $(RELEASE_NOTES) \
+		dist/$(PROJECT_NAME)-$(PROJECT_VERSION).tar.gz \
+		dist/$(PROJECT_NAME)-$(PROJECT_VERSION)-py3-none-any.whl

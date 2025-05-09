@@ -1,13 +1,34 @@
-[tool.poetry]
+[project]
 name = "poetry-docker-plugin"
-version = "0.5.4"
 description = "A poetry plugin for configure and build docker images."
-authors = [ "Evangelos Michelioudakis <vagmcs@gmail.com>" ]
-license = "MIT"
 readme = "README.md"
+requires-python = ">=3.9"
 keywords = [ "poetry", "packaging", "docker" ]
+dynamic = [ "version", "classifiers", "dependencies" ]
+
+
+[[project.authors]]
+name = "Evangelos Michelioudakis"
+email = "vagmcs@gmail.com"
+
+
+[project.license]
+text = "MIT"
+
+
+[project.urls]
+homepage = "https://github.com/vagmcs/python-blueprint"
 repository = "https://github.com/vagmcs/poetry-docker-plugin"
-documentation = "https://github.com/vagmcs/poetry-docker-plugin"
+documentation = "https://vagmcs.github.io/poetry-docker-plugin"
+
+
+[project.entry-points."poetry.application.plugin"]
+docker = "poetry_docker_plugin.plugin:DockerPlugin"
+
+
+[tool.poetry]
+version = "0.5.4"
+requires-poetry = ">=2.0.0"
 classifiers = [
 "Intended Audience :: Developers",
 "Intended Audience :: Information Technology",
@@ -44,17 +65,20 @@ gitpython = "^3.1.44"
 
 
 [tool.poetry.group.dev.dependencies]
-black = "^25.1.0"
-mypy = "^1.15.0"
-pytest = "^8.3.5"
-ruff = "^0.9.10"
+docformatter = "^1.7.5"
 isort = "^6.0.1"
-commitizen = "^4.4.1"
+ruff = "^0.11.7"
+mypy = "^1.15.0"
+pyupgrade = "^3.19.1"
+pytest = "^8.3.5"
+pytest-cov = "^6.1.0"
+pytest-sugar = "^1.0.0"
+pytest-mock = "^3.14.0"
+hypothesis = "^6.131.9"
 mkdocs = "^1.6.1"
-
-
-[tool.poetry.plugins."poetry.application.plugin"]
-docker = "poetry_docker_plugin.plugin:DockerPlugin"
+pre-commit = "^4.2.0"
+commitizen = "^4.6.0"
+cz-conventional-gitmoji = "^0.7.0"
 
 
 [tool.mypy]
@@ -80,10 +104,12 @@ strict_equality = true
 implicit_reexport = true
 
 
-[tool.black]
-line_length = 120
-target_version = [ "py39", "py310", "py311", "py312", "py313" ]
-color = true
+[tool.docformatter]
+black = true
+in-place = true
+recursive = true
+pre-summary-newline = true
+make-summary-multi-line = true
 
 
 [tool.isort]
@@ -142,39 +168,28 @@ exclude = [
 ]
 
 
-[tool.commitizen]
-name = "cz_customize"
-version = "0.2.0"
-tag_format = "v$version"
+[tool.ruff.format]
+docstring-code-format = true
 
 
-[tool.commitizen.customize]
-change_type_order = [
-"BREAKING CHANGE",
-"feat",
-"build",
-"fix",
-"perf",
-"refactor",
-"style"
+[tool.pytest.ini_options]
+addopts = "--capture=no --doctest-modules --cov=poetry_docker_plugin --no-cov-on-fail"
+doctest_optionflags = [
+"NUMBER",
+"NORMALIZE_WHITESPACE",
+"DONT_ACCEPT_TRUE_FOR_1",
+"IGNORE_EXCEPTION_DETAIL"
 ]
-commit_parser = "^(?P<change_type>feature|feat|bug fix|bug|fix|perf|build|ci|docs|refactor):\\s(?P<message>.*)?"
-changelog_pattern = "^(feature|feat|bugfix|bug|fix|perf|build|ci|docs|refactor|perf)?(!)?"
 
 
-[tool.commitizen.customize.change_type_map]
-feat = "Features"
-feature = "Features"
-"bug fix" = "Fixes"
-bugfix = "Fixes"
-bug = "Fixes"
-fix = "Fixes"
-ci = "CI"
-build = "Build"
-docs = "Documentation"
-refactor = "Refactor"
-perf = "Performance"
-style = "Code style"
+[tool.commitizen]
+name = "cz_gitmoji"
+version_scheme = "pep440"
+version_provider = "poetry"
+update_changelog_on_bump = true
+template = "docs/templates/changelog.j2"
+changelog_file = "docs/docs/changelog.md"
+release_notes_file = "docs/docs/release_notes.md"
 
 
 [build-system]

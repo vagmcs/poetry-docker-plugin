@@ -1,5 +1,5 @@
-# Types
-from typing import Dict, List, Optional
+# Futures
+from __future__ import annotations
 
 # Standard Library
 import abc
@@ -14,15 +14,15 @@ COMMANDS = ("tags", "args", "from", "labels", "copy", "env", "expose", "volume",
 
 class Instruction(metaclass=abc.ABCMeta):
     """
-    Docker instruction metaclass is extended by every docker command that
-    needs to be supported by the plugin.
+    Docker instruction metaclass is extended by every docker command that needs to be
+    supported by the plugin.
     """
 
     pass
 
 
 class Arg(Instruction):
-    def __init__(self, arg_name: str, default_value: Optional[str] = None):
+    def __init__(self, arg_name: str, default_value: str | None = None):
         """
         Creates a docker ARG instruction:
 
@@ -39,7 +39,7 @@ class Arg(Instruction):
 
 
 class Labels(Instruction):
-    def __init__(self, labels: Dict[str, str]):
+    def __init__(self, labels: dict[str, str]):
         """
         Creates a docker LABEL instruction:
 
@@ -54,7 +54,7 @@ class Labels(Instruction):
 
 
 class From(Instruction):
-    def __init__(self, base_image: str, platform: Optional[str] = None):
+    def __init__(self, base_image: str, platform: str | None = None):
         """
         Creates a docker FROM instruction:
 
@@ -158,7 +158,7 @@ class WorkDir(Instruction):
 
 
 class User(Instruction):
-    def __init__(self, user: str, group: Optional[str] = None):
+    def __init__(self, user: str, group: str | None = None):
         """
         Creates a docker USER instruction:
 
@@ -194,7 +194,7 @@ class Run(Instruction):
 
 
 class Cmd(Instruction):
-    def __init__(self, args: List[str]):
+    def __init__(self, args: list[str]):
         """
         Creates a docker CMD instruction:
 
@@ -214,7 +214,7 @@ class Cmd(Instruction):
 
 
 class EntryPoint(Instruction):
-    def __init__(self, args: List[str]):
+    def __init__(self, args: list[str]):
         """
         Creates a docker ENTRYPOINT instruction:
 
@@ -233,8 +233,8 @@ class EntryPoint(Instruction):
         return f"ENTRYPOINT [{args}]"
 
 
-class DockerFile(object):
-    def __init__(self, io: IO, instructions: Optional[List[Instruction]] = None):
+class DockerFile:
+    def __init__(self, io: IO, instructions: list[Instruction] | None = None):
         """
         Creates a docker file from a sequence of instructions.
 
@@ -254,6 +254,7 @@ class DockerFile(object):
     def create(self, dockerfile_name: str = "Dockerfile") -> None:
         """
         Creates the docker file.
+
         :param dockerfile_name: a name for the resulting Dockerfile
         """
         if not os.path.exists("dist"):
@@ -266,9 +267,9 @@ class DockerFile(object):
 
     def build(
         self,
-        image_tags: List[str],
-        platform: List[str],
-        arguments: Optional[Dict[str, str]] = None,
+        image_tags: list[str],
+        platform: list[str],
+        arguments: dict[str, str] | None = None,
         dockerfile_name: str = "Dockerfile",
         push: bool = False,
     ) -> None:
@@ -288,7 +289,7 @@ class DockerFile(object):
             build_command.command(),
             stdin=subprocess.PIPE,
             stdout=subprocess.PIPE,
-            universal_newlines=True,
+            text=True,
         )
 
         if result.returncode == 0:
@@ -300,7 +301,7 @@ class DockerFile(object):
                 push_command.command(),
                 stdin=subprocess.PIPE,
                 stdout=subprocess.PIPE,
-                universal_newlines=True,
+                text=True,
             )
         elif push:
             for tag in image_tags:
@@ -315,7 +316,7 @@ class DockerFile(object):
             ],
             stdin=subprocess.PIPE,
             stdout=subprocess.PIPE,
-            universal_newlines=True,
+            text=True,
         )
 
         if result.returncode == 0:
@@ -327,9 +328,9 @@ class DockerFile(object):
 class BuildCommand:
     def __init__(
         self,
-        image_tags: List[str],
-        platform: List[str],
-        arguments: Optional[Dict[str, str]] = None,
+        image_tags: list[str],
+        platform: list[str],
+        arguments: dict[str, str] | None = None,
         dockerfile_name: str = "Dockerfile",
     ) -> None:
         self.arguments = arguments
@@ -337,7 +338,7 @@ class BuildCommand:
         self.dockerfile_name = dockerfile_name
         self.platform = platform
 
-    def command(self) -> List[str]:
+    def command(self) -> list[str]:
         common_args = [
             *[
                 f"--build-arg={arg}={value}"
@@ -382,9 +383,9 @@ class BuildCommand:
 class PushCommand:
     def __init__(
         self,
-        image_tags: List[str],
-        platform: List[str],
-        arguments: Optional[Dict[str, str]] = None,
+        image_tags: list[str],
+        platform: list[str],
+        arguments: dict[str, str] | None = None,
         dockerfile_name: str = "Dockerfile",
     ) -> None:
         self.arguments = arguments
@@ -392,7 +393,7 @@ class PushCommand:
         self.dockerfile_name = dockerfile_name
         self.platform = platform
 
-    def command(self) -> List[str]:
+    def command(self) -> list[str]:
         return [
             "docker",
             "buildx",

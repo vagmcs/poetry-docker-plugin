@@ -61,7 +61,7 @@ To build the image, just type:
 poetry docker
 ```
 
-Phew, that was easy!  
+Phew, that was easy!
 
 There are a couple of things to note here:
 
@@ -71,12 +71,12 @@ There are a couple of things to note here:
 
 3. The plugin automatically packages the project, copies the distribution into the docker container and installs all dependencies. Therefore, all entrypoints declared in `pyproject.toml`, such as `service` are accessible inside the docker image!
 
-Of course, you can customize all that, as we shall see shortly. 
+Of course, you can customize all that, as we shall see shortly.
 
 Finally, if you are curious to inspect the underlying Dockerfile before building it, just type:
 
 ```bash
-poetry docker --dockerfile-only 
+poetry docker --dockerfile-only
 ```
 
 ## Configuration Overview
@@ -134,7 +134,7 @@ docker images
 
 ## Multiple docker images
 
-In a number of projects, there are multiple modules, and thus, it is necessary to build more than one docker images from the project sources. For instance, machine learning engineers often need to build one image for training a model, and one for the service deployed in production after the training has been completed. To that end, `poetry-docker-plugin` supports multi-docker image configurations. 
+In a number of projects, there are multiple modules, and thus, it is necessary to build more than one docker images from the project sources. For instance, machine learning engineers often need to build one image for training a model, and one for the service deployed in production after the training has been completed. To that end, `poetry-docker-plugin` supports multi-docker image configurations.
 
 Consider the following simple example of a machine learning project configuration:
 

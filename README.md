@@ -1,9 +1,7 @@
 # Poetry Docker Plugin
 
-[![License: LGPL v3](https://img.shields.io/badge/License-MIT-blue.svg)](https://mit-license.org)
 ![PyPI](https://img.shields.io/pypi/v/poetry-docker-plugin?color=gree&label=pypi%20package)
 ![PyPI](https://img.shields.io/pypi/pyversions/poetry-docker-plugin?color=gree)
-[![Conventional Commits](https://img.shields.io/badge/Conventional%20Commits-1.0.0-yellow.svg)](https://conventionalcommits.org)
 
 [Poetry](https://python-poetry.org) docker plugin is an extension for configuring and building docker images directly from the comfort of your `pyproject.toml` configuration.
 
@@ -23,10 +21,17 @@ The key features are:
 
 ## Installation
 
-In order to install the plugin you need to have installed a poetry version `>=1.8.0` and type:
+In order to install the plugin you need to have installed a poetry version `>=2.0.0` and type:
 
 ```bash
 poetry self add poetry-docker-plugin
+```
+
+or add the following to your `pyproject.toml`:
+
+```toml
+[tool.poetry.requires-plugins]
+poetry-docker-plugin = ">=0.5.4"
 ```
 
 ## License
