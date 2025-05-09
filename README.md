@@ -1,7 +1,17 @@
 # Poetry Docker Plugin
 
-![PyPI](https://img.shields.io/pypi/v/poetry-docker-plugin?color=gree&label=pypi%20package)
-![PyPI](https://img.shields.io/pypi/pyversions/poetry-docker-plugin?color=gree)
+<a href="https://github.com/vagmcs/poetry-docker-plugin/actions/workflows/tester.yml" target="_blank">
+    <img src="https://github.com/vagmcs/poetry-docker-plugin/actions/workflows/tester.yml/badge.svg?event=push&branch=main" alt="Test">
+</a>
+<a href="https://results.pre-commit.ci/latest/github/vagmcs/poetry-docker-plugin/main" target="_blank">
+    <img src="https://results.pre-commit.ci/badge/github/vagmcs/poetry-docker-plugin/main.svg" alt="pre-commit.ci status">
+</a>
+<a href="https://pypi.org/project/poetry-docker-plugin" target="_blank">
+    <img src="https://img.shields.io/pypi/v/poetry-docker-plugin?color=gree&label=pypi%20package">
+</a>
+<a href="https://pypi.org/project/poetry-docker-plugin" target="_blank">
+    <img src="https://img.shields.io/pypi/pyversions/poetry-docker-plugin?color=gree">
+</a>
 
 [Poetry](https://python-poetry.org) docker plugin is an extension for configuring and building docker images directly from the comfort of your `pyproject.toml` configuration.
 
