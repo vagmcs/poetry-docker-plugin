@@ -77,7 +77,7 @@ pytest-mock = "^3.14.1"
 hypothesis = "^6.131.9"
 mkdocs = "^1.6.1"
 pre-commit = "^4.2.0"
-commitizen = "^4.6.0"
+commitizen = "^4.8.3"
 cz-conventional-gitmoji = "^0.7.0"
 
 
