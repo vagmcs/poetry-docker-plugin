@@ -133,9 +133,9 @@ class DockerBuild(Command):
             self.error(f"Unknown commands: {','.join(set(docker_config).difference(COMMANDS))}")
 
         # extract project name, version, authors and python version
-        project_name = project_config.get("name")
-        project_version = poetry_config.get("version", project_config.get("version"))
-        project_authors = [f"{author['name']} <{author['email']}>" for author in project_config.get("authors")]
+        project_name = project_config["name"]
+        project_version = poetry_config.get("version", project_config["version"])
+        project_authors = [f"{author['name']} <{author['email']}>" for author in project_config["authors"]]
         full_python_version = poetry_config.get("dependencies", project_config.get("dependencies", dict())).get(
             "python"
         )
