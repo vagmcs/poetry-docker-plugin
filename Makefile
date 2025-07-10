@@ -27,7 +27,7 @@ format:
 	@poetry run ruff format $(PROJECT_NAME) tests
 	@poetry run docformatter $(PROJECT_NAME) tests || true
 
-### compile        : Apply code styling and perform type checks
+### lint           : Apply code styling and perform type checks
 .PHONY: lint
 lint:
 	@poetry check

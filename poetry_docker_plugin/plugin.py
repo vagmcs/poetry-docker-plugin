@@ -7,9 +7,8 @@ import sys
 
 # Dependencies
 import git
-from cleo.application import Application
-from cleo.commands.command import Command
 from cleo.helpers import option
+from poetry.console.application import Application, Command
 from poetry.plugins.application_plugin import ApplicationPlugin
 
 from .docker_builder import (
@@ -102,19 +101,21 @@ class DockerBuild(Command):
         raise RuntimeError(message)
 
     def handle(self) -> int:
-        pyproject_config = self.application.poetry.pyproject.data  # type: ignore
-        config: dict[str, Any] = pyproject_config.get("tool", dict()).get("docker", dict())
+        pyproject_config = self.poetry.pyproject.data.unwrap()
+        poetry_config = self.poetry.pyproject.poetry_config
+        project_config: dict[str, Any] = pyproject_config.get("project", dict())
+        docker_config: dict[str, Any] = pyproject_config.get("tool", dict()).get("docker", dict())
 
         # if no configuration exists, then stop execution
-        if not config:
+        if not docker_config:
             self.error("No configuration found in [tool.docker] in pyproject.toml")
 
         # infer image(s) structure
         multiple_images = {None}
-        if all(entry not in COMMANDS for entry in set(config)):
-            if all(entry in COMMANDS for image in set(config) for entry in config[image]):
-                multiple_images = set(config)  # type: ignore
-                self.info(f"Detected '{len(set(config))}' image(s): {list(set(config))}.")
+        if all(entry not in COMMANDS for entry in set(docker_config)):
+            if all(entry in COMMANDS for image in set(docker_config) for entry in docker_config[image]):
+                multiple_images = set(docker_config)  # type: ignore
+                self.info(f"Detected '{len(set(docker_config))}' image(s): {list(set(docker_config))}.")
 
                 # check if only a subset of images should be build
                 if self.option("build-only"):
@@ -122,21 +123,23 @@ class DockerBuild(Command):
                     multiple_images = multiple_images.intersection(selected)
                     self.warning(f"Building only image(s): {list(multiple_images)}.")
             else:
-                for image in set(config):
-                    if any(entry not in COMMANDS for entry in config[image]):
+                for image in set(docker_config):
+                    if any(entry not in COMMANDS for entry in docker_config[image]):
                         self.error(
-                            f"Image [{image}] has unknown commands: {','.join(set(config[image]).difference(COMMANDS))}"
+                            f"Image [{image}] has unknown commands: {','.join(set(docker_config[image]).difference(COMMANDS))}"
                         )
 
-        elif any(entry not in COMMANDS for entry in set(config)):
-            self.error(f"Unknown commands: {','.join(set(config).difference(COMMANDS))}")
+        elif any(entry not in COMMANDS for entry in set(docker_config)):
+            self.error(f"Unknown commands: {','.join(set(docker_config).difference(COMMANDS))}")
 
         # extract project name, version, authors and python version
-        project_name = pyproject_config.get("tool").get("poetry").get("name")
-        project_version = pyproject_config.get("tool").get("poetry").get("version")
-        project_authors = pyproject_config.get("tool").get("poetry").get("authors")
-        full_python_version = pyproject_config.get("tool").get("poetry").get("dependencies").get("python")
-        package_mode = pyproject_config.get("tool").get("poetry").get("package-mode", True)  # if None assume to be True
+        project_name = project_config.get("name")
+        project_version = poetry_config.get("version", project_config.get("version"))
+        project_authors = [f"{author['name']} <{author['email']}>" for author in project_config.get("authors")]
+        full_python_version = poetry_config.get("dependencies", project_config.get("dependencies", dict())).get(
+            "python"
+        )
+        package_mode = poetry_config.get("package-mode", True)  # if None assume to be True
 
         # parse Python version
         if full_python_version == "*":
@@ -180,7 +183,7 @@ class DockerBuild(Command):
             self.call("build")
 
         for config_name in multiple_images:
-            image_config = config if config_name is None else config.get(config_name)
+            image_config = docker_config if config_name is None else docker_config.get(config_name)
             self._build_image(
                 project_name,
                 project_version,
@@ -354,4 +357,4 @@ def factory() -> DockerBuild:
 
 class DockerPlugin(ApplicationPlugin):
     def activate(self, application: Application) -> None:
-        application.command_loader.register_factory("docker", factory)  # type: ignore
+        application.command_loader.register_factory("docker", factory)
