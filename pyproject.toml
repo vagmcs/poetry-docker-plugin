@@ -27,7 +27,7 @@ docker = "poetry_docker_plugin.plugin:DockerPlugin"
 
 
 [tool.poetry]
-version = "0.5.4"
+version = "0.6.0"
 requires-poetry = ">=2.0.0"
 classifiers = [
 "Intended Audience :: Developers",

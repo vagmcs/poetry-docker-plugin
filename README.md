@@ -41,7 +41,7 @@ or add the following to your `pyproject.toml`:
 
 ```toml
 [tool.poetry.requires-plugins]
-poetry-docker-plugin = ">=0.5.4"
+poetry-docker-plugin = ">=0.x.x"
 ```
 
 ## License
