@@ -37,26 +37,8 @@
                             <li class="nav-item">
                                 <a href="." class="nav-link active" aria-current="page">Home</a>
                             </li>
-                            <li class="nav-item dropdown">
-                                <a href="#" class="nav-link dropdown-toggle" role="button" data-bs-toggle="dropdown"  aria-expanded="false">Release Notes</a>
-                                <ul class="dropdown-menu">
-                                    
-<li>
-    <a href="release_notes/0.5.2/" class="dropdown-item">0.5.2</a>
-</li>
-                                    
-<li>
-    <a href="release_notes/0.5.1/" class="dropdown-item">0.5.1</a>
-</li>
-                                    
-<li>
-    <a href="release_notes/0.5.0/" class="dropdown-item">0.5.0</a>
-</li>
-                                    
-<li>
-    <a href="release_notes/0.4.0/" class="dropdown-item">0.4.0</a>
-</li>
-                                </ul>
+                            <li class="nav-item">
+                                <a href="changelog/" class="nav-link">Release Notes</a>
                             </li>
                         </ul>
 
@@ -72,7 +54,7 @@
                                 </a>
                             </li>
                             <li class="nav-item">
-                                <a rel="next" href="release_notes/0.5.2/" class="nav-link">
+                                <a rel="next" href="changelog/" class="nav-link">
                                     Next <i class="fa fa-arrow-right"></i>
                                 </a>
                             </li>
@@ -152,8 +134,12 @@
 <li>Multi-platform build support.</li>
 </ul>
 <h2 id="installation">Installation</h2>
-<p>In order to install the plugin you need to have installed a poetry version <code>&gt;=1.2.0</code> and type:</p>
+<p>In order to install the plugin you need to have installed a poetry version <code>&gt;=2.0.0,&lt;3.0.0</code> and type:</p>
 <pre><code class="language-bash">poetry self add poetry-docker-plugin
+</code></pre>
+<p>or add the following to your <code>pyproject.toml</code>:</p>
+<pre><code class="language-toml">[tool.poetry.requires-plugins]
+poetry-docker-plugin = &quot;&gt;=0.x.x&quot;
 </code></pre>
 <p>That it, you are ready to go!</p>
 <h2 id="quickstart">Quickstart</h2>
@@ -181,7 +167,7 @@ cmd = [&quot;service&quot;]
 <p>To build the image, just type:</p>
 <pre><code class="language-bash">poetry docker
 </code></pre>
-<p>Phew, that was easy!  </p>
+<p>Phew, that was easy!</p>
 <p>There are a couple of things to note here:</p>
 <ol>
 <li>
@@ -194,9 +180,9 @@ cmd = [&quot;service&quot;]
 <p>The plugin automatically packages the project, copies the distribution into the docker container and installs all dependencies. Therefore, all entrypoints declared in <code>pyproject.toml</code>, such as <code>service</code> are accessible inside the docker image!</p>
 </li>
 </ol>
-<p>Of course, you can customize all that, as we shall see shortly. </p>
+<p>Of course, you can customize all that, as we shall see shortly.</p>
 <p>Finally, if you are curious to inspect the underlying Dockerfile before building it, just type:</p>
-<pre><code class="language-bash">poetry docker --dockerfile-only 
+<pre><code class="language-bash">poetry docker --dockerfile-only
 </code></pre>
 <h2 id="configuration-overview">Configuration Overview</h2>
 <p>Poetry docker plugin supports most of the commands you can use in a <a href="https://docs.docker.com/engine/reference/builder">Dockerfile</a>. Here is a full configuration the demonstrates all available commands:</p>
@@ -242,7 +228,7 @@ cmd = [&quot;service&quot;, &quot;--verbose&quot;] # you may also use entrypoint
 <pre><code class="language-bash">docker images
 </code></pre>
 <h2 id="multiple-docker-images">Multiple docker images</h2>
-<p>In a number of projects, there are multiple modules, and thus, it is necessary to build more than one docker images from the project sources. For instance, machine learning engineers often need to build one image for training a model, and one for the service deployed in production after the training has been completed. To that end, <code>poetry-docker-plugin</code> supports multi-docker image configurations. </p>
+<p>In a number of projects, there are multiple modules, and thus, it is necessary to build more than one docker images from the project sources. For instance, machine learning engineers often need to build one image for training a model, and one for the service deployed in production after the training has been completed. To that end, <code>poetry-docker-plugin</code> supports multi-docker image configurations.</p>
 <p>Consider the following simple example of a machine learning project configuration:</p>
 <pre><code class="language-toml">[tool.poetry]
 name = &quot;example_ml_project&quot;
@@ -432,5 +418,5 @@ cmd = [&quot;service&quot;]
 
 <!--
 MkDocs version : 1.6.1
-Build Date UTC : 2024-09-09 07:23:25.633203+00:00
+Build Date UTC : 2025-07-11 10:52:28.883523+00:00
 -->
