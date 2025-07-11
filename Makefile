@@ -48,7 +48,7 @@ build: test
 ### local-docs     : Run local documentation server
 .PHONY: local-docs
 local-docs: build
-	@mkdocs serve -f docs/mkdocs.yml
+	@poetry run mkdocs serve -f docs/mkdocs.yml
 
 ### docker         : Build docker image
 .PHONY: docker
