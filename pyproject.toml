@@ -60,7 +60,7 @@ include = "poetry_docker_plugin"
 
 [tool.poetry.dependencies]
 python = "^3.9"
-poetry = ">=1.8.0,<3.0.0"
+poetry = ">=2.0.0,<3.0.0"
 gitpython = "^3.1.44"
 
 
@@ -193,5 +193,5 @@ release_notes_file = "docs/docs/release_notes.md"
 
 
 [build-system]
-requires = [ "poetry-core" ]
+requires = [ "poetry-core>=2.0.0,<3.0.0" ]
 build-backend = "poetry.core.masonry.api"
