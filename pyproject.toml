@@ -61,7 +61,7 @@ include = "poetry_docker_plugin"
 [tool.poetry.dependencies]
 python = "^3.9"
 poetry = ">=2.0.0,<3.0.0"
-gitpython = "^3.1.44"
+gitpython = "^3.1.45"
 
 
 [tool.poetry.group.dev.dependencies]
