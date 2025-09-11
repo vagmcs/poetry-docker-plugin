@@ -182,8 +182,12 @@ doctest_optionflags = [
 ]
 
 
+[tool.coverage.run]
+data_file = "coverage/.coverage"
+
+
 [tool.commitizen]
-name = "cz_gitmoji"
+name = "cz_conventional_commits"
 version_scheme = "pep440"
 version_provider = "poetry"
 update_changelog_on_bump = true
