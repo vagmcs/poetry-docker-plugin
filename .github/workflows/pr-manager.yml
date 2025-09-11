@@ -6,6 +6,7 @@ on:
       - opened
       - synchronize
       - reopened
+      - edited
 
 permissions:
   contents: read
@@ -20,17 +21,21 @@ jobs:
   assign-labels:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: release-drafter/release-drafter@v6
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  validate-title:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: thehanimo/pr-title-checker@v1.4.3
         with:
-          fetch-depth: 0
-      - uses: actions/labeler@v5
-        with:
-          sync-labels: true
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   check:
     if: always()
     needs:
     - assign-author
     - assign-labels
+    - validate-title
     runs-on: ubuntu-latest
 
     steps:

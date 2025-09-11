@@ -43,11 +43,6 @@ repos:
     hooks:
       - id: gitleaks
 
-  - repo: https://github.com/ljnsn/cz-conventional-gitmoji
-    rev: v0.7.0
-    hooks:
-      - id: conventional-gitmoji
-
 ci:
-  autofix_commit_msg: 🎨 [pre-commit.ci] auto fixes from pre-commit.com hooks
-  autoupdate_commit_msg: ⬆️ [pre-commit.ci] pre-commit autoupdate
+  autofix_commit_msg: "ci: Auto fixes from pre-commit.com hooks"
+  autoupdate_commit_msg: "ci: Autoupdate pre-commit"
