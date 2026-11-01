@@ -17,17 +17,17 @@ jobs:
   assign-author:
     runs-on: ubuntu-latest
     steps:
-      - uses: toshimaru/auto-author-assign@v2.1.1
+      - uses: toshimaru/auto-author-assign@v3.1.0
   assign-labels:
     runs-on: ubuntu-latest
     steps:
-      - uses: release-drafter/release-drafter@v6
+      - uses: release-drafter/release-drafter@v7
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   validate-title:
     runs-on: ubuntu-latest
     steps:
-      - uses: thehanimo/pr-title-checker@v1.4.3
+      - uses: thehanimo/pr-title-checker@v2.0.0
         with:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   check:
